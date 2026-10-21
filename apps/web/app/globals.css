@@ -1924,7 +1924,14 @@ button {
 
 /* One gradient per person: electric blue through violet and coral to orange. */
 .tone-0 {
-  --g-base: linear-gradient(135deg, #1f3fd8 0%, #4b3fc4 28%, #c4405a 58%, #f07a2c 85%, #ffb877 100%);
+  --g-base: linear-gradient(
+    135deg,
+    #1f3fd8 0%,
+    #4b3fc4 28%,
+    #c4405a 58%,
+    #f07a2c 85%,
+    #ffb877 100%
+  );
   --g-glow: linear-gradient(transparent, transparent);
   --g-shade: linear-gradient(transparent, transparent);
   --g-drop: rgba(75, 63, 196, 0.55);
