@@ -1,8 +1,5 @@
-export const REACTIONS = ['🔥', '👏', '💪'] as const;
-export type Reaction = (typeof REACTIONS)[number];
-
-export interface DemoReactions {
-  counts: Record<Reaction, number>;
-  /** Crew mates who reacted, for "Alex +3". */
+export interface DemoKudos {
+  count: number;
+  /** Crew mates who gave kudos, for "Alex and 3 others". */
   by: string[];
 }

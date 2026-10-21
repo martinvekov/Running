@@ -18,10 +18,7 @@ export default function DemoStandingsPage() {
           <div className="hero-copy">
             <p className="eyebrow">{finished ? 'Season winner' : 'Leading'}</p>
             <p className="hero-name display">{runnerName(leader.runnerId)}</p>
-            <p className="hero-points display">
-              {leader.points}
-              <span>pts</span>
-            </p>
+            <p className="hero-points">{leader.points} points</p>
             {second && (
               <p className="muted small">
                 {leader.points - second.points} ahead of {runnerName(second.runnerId)}

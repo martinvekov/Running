@@ -147,7 +147,7 @@ export default async function DemoRunnerPage({ params }: { params: Promise<{ id:
                         <span className={`chip source ${run.source}`}>
                           {run.source === 'strava' ? 'Strava' : 'Manual'}
                         </span>
-                        {run.bountyClaimed && <span className="chip bounty-chip">★ Bounty</span>}
+                        {run.bountyClaimed && <span className="chip bounty-chip">Bounty</span>}
                       </div>
                     </Link>
                   </li>

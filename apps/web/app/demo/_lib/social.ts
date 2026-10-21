@@ -1,7 +1,7 @@
 import { fixture } from './data';
-import type { DemoReactions, Reaction } from './reactions';
+import type { DemoKudos } from './reactions';
 
-// Demo-only reactions, generated deterministically so every build shows the same feed.
+// Demo-only kudos, generated deterministically so every build shows the same feed.
 // Real reactions arrive with the social layer (milestone 5) as events.
 
 function hash(text: string): number {
@@ -10,18 +10,10 @@ function hash(text: string): number {
   return h >>> 0;
 }
 
-export function demoReactions(itemId: string, authorId?: string): DemoReactions {
+export function demoKudos(itemId: string, authorId?: string): DemoKudos {
   const h = hash(itemId);
-  const counts = {
-    '🔥': h % 5,
-    '👏': (h >>> 3) % 4,
-    '💪': (h >>> 6) % 3,
-  } as Record<Reaction, number>;
   const mates = fixture.runners.filter((r) => r.id !== authorId).map((r) => r.id);
-  const total = counts['🔥'] + counts['👏'] + counts['💪'];
-  const by = Array.from(
-    { length: Math.min(total, mates.length) },
-    (_, i) => mates[(h + i) % mates.length]!,
-  );
-  return { counts, by: [...new Set(by)] };
+  const count = h % (mates.length + 1);
+  const by = Array.from({ length: count }, (_, i) => mates[(h + i) % mates.length]!);
+  return { count, by };
 }

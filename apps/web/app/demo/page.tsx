@@ -15,7 +15,7 @@ export default function DemoFeedPage() {
   return (
     <main className="page with-tabbar">
       <PageTitle
-        title="Crew feed"
+        title="Feed"
         chip="Demo"
         sub={`${fixture.crewName} · Season 1 · ${formatShortDate(first.startDate)} – ${formatShortDate(last.endDate)}`}
       />

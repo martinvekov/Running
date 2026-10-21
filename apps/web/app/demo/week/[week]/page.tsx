@@ -36,11 +36,8 @@ export default async function DemoWeekPage({ params }: { params: Promise<{ week:
 
       {week.bounty && (
         <section className="card bounty">
-          <span className="bounty-icon" aria-hidden>
-            ★
-          </span>
           <div>
-            <p className="eyebrow">This week&apos;s bounty · 5 pts</p>
+            <p className="eyebrow">Bounty · 5 points</p>
             <p className="bounty-title">{week.bounty}</p>
           </div>
         </section>

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { StandingRow } from '@crew/engine';
 import { fixture, result, runnerName, runnersById } from './data';
-import { Reactions } from './client';
+import { Kudos } from './client';
 import type { FeedItem, RunContext } from './feed';
 import {
   formatDay,
@@ -11,22 +11,14 @@ import {
   formatShortDate,
   RUN_STATUS,
 } from './format';
-import { demoReactions } from './social';
-
-const AVATAR_HUES = [152, 32, 228, 300, 88, 12, 188, 268];
-
-/** A distinct hue per runner, in roster order. */
-export function hueFor(id: string): number {
-  const index = fixture.runners.findIndex((r) => r.id === id);
-  return AVATAR_HUES[Math.max(0, index) % AVATAR_HUES.length]!;
-}
+import { demoKudos } from './social';
 
 export function Avatar({ id, size = 40, ring }: { id: string; size?: number; ring?: number }) {
   const name = runnersById.get(id)?.name ?? id;
   const avatar = (
     <span
       className="avatar"
-      style={{ width: size, height: size, fontSize: size * 0.42, ['--hue' as string]: hueFor(id) }}
+      style={{ width: size, height: size, fontSize: size * 0.38 }}
       aria-hidden
     >
       {name.slice(0, 1)}
@@ -66,7 +58,7 @@ export function PageTitle({ title, sub, chip }: { title: string; sub?: string; c
     <header className="page-title">
       <div className="page-title-row">
         <h1 className="display">{title}</h1>
-        {chip && <span className="badge">{chip}</span>}
+        {chip && <span className="tag-outline">{chip}</span>}
       </div>
       {sub && <p className="muted small">{sub}</p>}
     </header>
@@ -155,46 +147,46 @@ function FeedHead({ runnerId, when, extra }: { runnerId: string; when: string; e
   );
 }
 
-function reactionNames(itemId: string, authorId?: string) {
-  const r = demoReactions(itemId, authorId);
-  return { initial: r, names: r.by.map(runnerName) };
+function kudosFor(itemId: string, authorId?: string) {
+  const k = demoKudos(itemId, authorId);
+  return { initial: k, names: k.by.map(runnerName) };
 }
+
+const ORDINALS = ['1st', '2nd', '3rd'];
+const ordinal = (n: number) => ORDINALS[n - 1] ?? `${n}th`;
 
 export function RunPoster({ ctx, large = false }: { ctx: RunContext; large?: boolean }) {
   const { run } = ctx;
   const status = RUN_STATUS[run.status]!;
   return (
-    <div
-      className={large ? 'poster large' : 'poster'}
-      style={{ ['--hue' as string]: hueFor(ctx.runnerId) }}
-    >
+    <div className={large ? 'poster large' : 'poster'}>
       <div className="poster-top">
-        <span className="poster-day display">{formatDay(run.runDate)}</span>
-        <span className="poster-chips">
-          {run.bountyClaimed && <span className="chip bounty-chip">★ Bounty</span>}
-          <span className={`chip source ${run.source}`}>
+        <span className="poster-day">{formatDay(run.runDate)}</span>
+        <span className="poster-meta">
+          {run.bountyClaimed && <span className="meta-bounty">Bounty</span>}
+          <span className={`meta-source ${run.source}`}>
             {run.source === 'strava' ? 'Strava' : 'Manual'}
           </span>
         </span>
       </div>
       <div className="poster-distance display">
-        {(run.distanceM / 1000).toFixed(1)}
+        {(run.distanceM / 1000).toFixed(2)}
         <span>km</span>
       </div>
-      <div className="poster-stats">
+      <dl className="poster-stats">
         <div>
-          <small>Time</small>
-          <strong>{formatDuration(run.durationS)}</strong>
+          <dt>Time</dt>
+          <dd>{formatDuration(run.durationS)}</dd>
         </div>
         <div>
-          <small>Pace</small>
-          <strong>{formatPace(run.durationS, run.distanceM).replace(' /km', '')}</strong>
+          <dt>Pace</dt>
+          <dd>{formatPace(run.durationS, run.distanceM)}</dd>
         </div>
         <div>
-          <small>Status</small>
-          <strong className={`status-${status.tone}`}>{status.label}</strong>
+          <dt>Status</dt>
+          <dd className={`status-${status.tone}`}>{status.label}</dd>
         </div>
-      </div>
+      </dl>
     </div>
   );
 }
@@ -223,15 +215,17 @@ function RunCard({ item }: { item: Extract<FeedItem, { kind: 'run' }> }) {
           <div className="duel-row small">
             <span className="muted">
               {ctx.completedCommitment
-                ? `Hit their word: ${formatKm(ctx.commitment.km)} ✓`
-                : `Week ${ctx.weekIndex + 1}: ${Math.round(ctx.pctAfter)}% of ${formatKm(ctx.commitment.km)}`}
+                ? `Commitment complete · ${formatKm(ctx.commitment.km)}`
+                : `${Math.round(ctx.pctAfter)}% of ${formatKm(ctx.commitment.km)} this week`}
             </span>
-            <span className="muted">+{Math.round(ctx.pctAfter - ctx.pctBefore)}%</span>
+            <span className="muted">
+              {Math.round(ctx.pctBefore)}% → {Math.round(ctx.pctAfter)}%
+            </span>
           </div>
           <Progress pct={ctx.pctAfter} from={ctx.pctBefore} />
         </div>
       )}
-      <Reactions {...reactionNames(item.id, ctx.runnerId)} />
+      <Kudos {...kudosFor(item.id, ctx.runnerId)} />
     </article>
   );
 }
@@ -242,18 +236,18 @@ function CommitCard({ item }: { item: Extract<FeedItem, { kind: 'commit' }> }) {
   return (
     <article className="feed-card compact">
       <FeedHead runnerId={item.runnerId} when={formatDay(item.at.slice(0, 10))} />
-      <p className="feed-statement">
-        <span className="muted">Committed for week {item.weekIndex + 1}</span>
+      <div className="feed-statement">
+        <span className="muted small">Commitment for week {item.weekIndex + 1}</span>
         <strong className="display">
           {item.runs} runs · {item.km} km
         </strong>
         {above !== 0 && (
-          <span className={above > 0 ? 'tag up' : 'tag'}>
-            {above > 0 ? `+${above}%` : `${above}%`} vs usual
+          <span className="muted small">
+            {above > 0 ? `${above}% above` : `${-above}% below`} their usual week
           </span>
         )}
-      </p>
-      <Reactions {...reactionNames(item.id, item.runnerId)} />
+      </div>
+      <Kudos {...kudosFor(item.id, item.runnerId)} />
     </article>
   );
 }
@@ -261,24 +255,28 @@ function CommitCard({ item }: { item: Extract<FeedItem, { kind: 'commit' }> }) {
 function OvertakeCard({ item }: { item: Extract<FeedItem, { kind: 'overtake' }> }) {
   const passed = item.passed.map(runnerName);
   return (
-    <article className="feed-card overtake">
+    <article className="feed-card">
       <Link href={`/demo/run/${item.activityId}`} className="overtake-body">
-        <span className="eyebrow">Overtake</span>
-        <p className="display overtake-line">
-          {runnerName(item.runnerId)} passes {passed.join(' & ')}
-        </p>
-        <p className="muted small">Now #{item.rank} in the season standings</p>
-        <div className="overtake-avatars">
-          <Avatar id={item.runnerId} size={44} />
-          <span className="overtake-arrow" aria-hidden>
-            ▲
-          </span>
-          {item.passed.map((id) => (
-            <Avatar key={id} id={id} size={34} />
-          ))}
+        <span className="overtake-icon" aria-hidden>
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path
+              d="M12 19V5M5.5 11.5 12 5l6.5 6.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        <div>
+          <p className="overtake-line">
+            {runnerName(item.runnerId)} moves up to {ordinal(item.rank)}
+          </p>
+          <p className="muted small">Passed {passed.join(' and ')} in the season standings</p>
         </div>
       </Link>
-      <Reactions {...reactionNames(item.id)} />
+      <Kudos {...kudosFor(item.id)} />
     </article>
   );
 }
@@ -287,33 +285,34 @@ function WeekCard({ item }: { item: Extract<FeedItem, { kind: 'week' }> }) {
   const week = result.weeks[item.weekIndex]!;
   const top = [...week.runners].sort((a, b) => b.points - a.points).slice(0, 3);
   return (
-    <article className="feed-card week-wrap">
+    <article className="feed-card">
       <Link href={`/demo/week/${item.weekIndex + 1}`} className="week-wrap-body">
-        <span className="eyebrow">
-          Week {item.weekIndex + 1} wrapped · {formatShortDate(week.startDate)} –{' '}
-          {formatShortDate(week.endDate)}
-        </span>
+        <div className="duel-row">
+          <strong>Week {item.weekIndex + 1} results</strong>
+          <span className="muted small">
+            {formatShortDate(week.startDate)} – {formatShortDate(week.endDate)}
+          </span>
+        </div>
         <ol className="podium">
           {top.map((rw, i) => (
             <li key={rw.runnerId}>
-              <span className="display podium-rank">{i + 1}</span>
-              <Avatar id={rw.runnerId} size={30} />
-              <strong>{runnerName(rw.runnerId)}</strong>
-              <span className="display podium-pts">{rw.points}</span>
+              <span className="podium-rank">{i + 1}</span>
+              <Avatar id={rw.runnerId} size={28} />
+              <span>{runnerName(rw.runnerId)}</span>
+              <span className="podium-pts">{rw.points} pts</span>
             </li>
           ))}
         </ol>
         <ul className="wrap-duels">
           {week.duels.map((d, i) => (
             <li key={i}>
-              ⚔ {d.sides.map((side) => runnerName(side.runnerId)).join(' v ')} ·{' '}
-              <strong>{d.summary}</strong>
+              {d.sides.map((side) => runnerName(side.runnerId)).join(', ')}: {d.summary}
             </li>
           ))}
         </ul>
-        <span className="link-more">See the week →</span>
+        <span className="link-more">View week</span>
       </Link>
-      <Reactions {...reactionNames(item.id)} />
+      <Kudos {...kudosFor(item.id)} />
     </article>
   );
 }

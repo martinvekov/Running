@@ -4,8 +4,8 @@ import { notFound } from 'next/navigation';
 import { result, runnerName, runnersById } from '../../_lib/data';
 import { runContexts, weekDays } from '../../_lib/feed';
 import { formatDay, formatKm } from '../../_lib/format';
-import { Reactions } from '../../_lib/client';
-import { demoReactions } from '../../_lib/social';
+import { Kudos } from '../../_lib/client';
+import { demoKudos } from '../../_lib/social';
 import { Avatar, Progress, RunPoster } from '../../_lib/ui';
 
 export function generateStaticParams() {
@@ -57,7 +57,7 @@ export default async function DemoRunPage({ params }: { params: Promise<{ id: st
   const days = weekDays(ctx.runnerId, ctx.weekIndex);
   const maxKm = Math.max(...days.map((d) => d.km), 1);
   const qualifies = ctx.run.status === 'counted' || ctx.run.status === 'km-only';
-  const reactions = demoReactions(`run-${id}`, ctx.runnerId);
+  const kudos = demoKudos(`run-${id}`, ctx.runnerId);
 
   return (
     <main className="page with-tabbar">
@@ -72,7 +72,7 @@ export default async function DemoRunPage({ params }: { params: Promise<{ id: st
       </div>
 
       <RunPoster ctx={ctx} large />
-      <Reactions initial={reactions} names={reactions.by.map(runnerName)} />
+      <Kudos initial={kudos} names={kudos.by.map(runnerName)} />
 
       <section className="card">
         <h2 className="card-title">What it counted for</h2>
@@ -96,7 +96,7 @@ export default async function DemoRunPage({ params }: { params: Promise<{ id: st
             <Progress pct={ctx.pctAfter} from={ctx.pctBefore} />
             {ctx.completedCommitment && (
               <p className="finish-line">
-                ✓ This run hit 100%
+                This run completed the commitment
                 {mySide?.completedOn
                   ? `, setting the duel finish on ${formatDay(mySide.completedOn)}`
                   : ''}
@@ -136,7 +136,7 @@ export default async function DemoRunPage({ params }: { params: Promise<{ id: st
             {duel.sides.map((s) => (
               <span key={s.runnerId} className="duel-teaser-side">
                 <Avatar id={s.runnerId} size={34} />
-                <span className="display">{Math.round(s.kmPct)}%</span>
+                <span className="display duel-pct">{Math.round(s.kmPct)}%</span>
               </span>
             ))}
           </div>
