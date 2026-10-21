@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
   if (!config) return NextResponse.redirect(new URL(`/c/${crewId}/log?error=strava`, request.url));
 
   const origin = await requestOrigin();
-  const state = `${randomUUID()}.${crewId}`;
+  const to = request.nextUrl.searchParams.get('to') === 'preseason' ? 'preseason' : 'log';
+  const state = `${randomUUID()}.${crewId}.${to}`;
   const response = NextResponse.redirect(
     stravaAuthorizeUrl({
       clientId: config.clientId,

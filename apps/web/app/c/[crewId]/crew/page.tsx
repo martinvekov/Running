@@ -74,7 +74,7 @@ export default async function CrewPage({
   const link = inviteUrl(`${proto}://${host}`, crew.invite_code as string);
 
   return (
-    <main className="page">
+    <main className="page with-tabbar">
       <Link href={season && season.status !== 'setup' ? `/c/${crewId}` : '/'} className="back">
         {season && season.status !== 'setup' ? '← Feed' : '← Your crews'}
       </Link>

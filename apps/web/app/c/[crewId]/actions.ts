@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { londonDate, rulesV1, validateCommitment } from '@crew/engine';
 import { getCrewContext, getSeasonView } from '@/lib/season-data';
+import { lookBackWindow } from '@/lib/lookback-window';
 import { syncStrava } from '@/lib/strava-sync';
 import {
   parseBaseline,
@@ -187,4 +188,13 @@ export async function syncStravaNow(formData: FormData) {
     await syncStrava([user.id], season.start_date, { force: true });
   }
   redirect(`/c/${crewId}/log?saved=strava-sync`);
+}
+
+/** Pull this runner's Strava runs for the pre-season look back (about seven months). */
+export async function importHistory(formData: FormData) {
+  const crewId = crewIdOf(formData);
+  const { user } = await getCrewContext(crewId);
+  const window = lookBackWindow(londonDate(new Date().toISOString()));
+  await syncStrava([user.id], window.historyFrom, { force: true, maxPages: 10 });
+  redirect(`/c/${crewId}/preseason?saved=imported`);
 }
