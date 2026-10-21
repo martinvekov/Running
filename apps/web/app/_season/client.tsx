@@ -75,36 +75,39 @@ export function TabBar({
   const [tapped, setTapped] = useState<{ href: string; from: string } | null>(null);
   useEffect(() => setTapped(null), [pathname]);
   return (
-    <nav className={items.length > 3 ? 'tabbar many' : 'tabbar'} aria-label="Sections">
-      {items.map((tab) => {
-        const active =
-          tapped && tapped.from === pathname ? tapped.href === tab.href : tab.match(pathname);
-        return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            onClick={() => setTapped({ href: tab.href, from: pathname })}
-            className={active ? 'tabbar-item active' : 'tabbar-item'}
-            aria-current={active ? 'page' : undefined}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
+    <>
+      <div className="tabbar-fade" aria-hidden />
+      <nav className={items.length > 3 ? 'tabbar many' : 'tabbar'} aria-label="Sections">
+        {items.map((tab) => {
+          const active =
+            tapped && tapped.from === pathname ? tapped.href === tab.href : tab.match(pathname);
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              onClick={() => setTapped({ href: tab.href, from: pathname })}
+              className={active ? 'tabbar-item active' : 'tabbar-item'}
+              aria-current={active ? 'page' : undefined}
             >
-              {tab.icon}
-            </svg>
-            <span>{tab.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                {tab.icon}
+              </svg>
+              <span>{tab.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </>
   );
 }
 

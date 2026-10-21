@@ -237,7 +237,7 @@ export default async function PreSeasonPage({
             );
           })}
         </ul>
-        <p className="caption">
+        <p className="caption caption-after">
           Each block is scored like a real season. Everyone is held to their own usual week, taken
           from the four weeks before the block. There are no commitments or bounties in the past.
         </p>
