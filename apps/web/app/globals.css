@@ -2431,10 +2431,10 @@ button {
 .tone-0 {
   --g-base: linear-gradient(160deg, #1d38cc 0%, #162a96 55%, #0d1b6e 100%);
   --g-glow: radial-gradient(
-    95% 80% at 100% 100%,
+    140% 120% at 100% 100%,
     #f2581b 0%,
-    rgba(226, 80, 26, 0.72) 32%,
-    transparent 70%
+    rgba(226, 80, 26, 0.88) 45%,
+    transparent 88%
   );
   --g-shade: linear-gradient(transparent, transparent);
   --g-drop: rgba(22, 42, 150, 0.6);
@@ -2443,10 +2443,10 @@ button {
 .tone-1 {
   --g-base: linear-gradient(160deg, #2c30b4 0%, #1c1c7c 55%, #0f1052 100%);
   --g-glow: radial-gradient(
-    95% 80% at 0% 100%,
+    140% 120% at 0% 100%,
     #ee5018 0%,
-    rgba(220, 76, 24, 0.7) 32%,
-    transparent 70%
+    rgba(220, 76, 24, 0.88) 45%,
+    transparent 88%
   );
   --g-shade: linear-gradient(transparent, transparent);
   --g-drop: rgba(28, 28, 124, 0.6);
@@ -2467,10 +2467,10 @@ button {
 .tone-3 {
   --g-base: linear-gradient(160deg, #2072c4 0%, #174c94 55%, #0e2d60 100%);
   --g-glow: radial-gradient(
-    110% 80% at 80% 100%,
+    155% 120% at 80% 100%,
     #f05a1a 0%,
-    rgba(224, 78, 24, 0.7) 32%,
-    transparent 70%
+    rgba(224, 78, 24, 0.88) 45%,
+    transparent 88%
   );
   --g-shade: linear-gradient(transparent, transparent);
   --g-drop: rgba(23, 76, 148, 0.6);
@@ -2479,10 +2479,10 @@ button {
 .tone-4 {
   --g-base: linear-gradient(160deg, #1d2c8e 0%, #121c62 55%, #0a103c 100%);
   --g-glow: radial-gradient(
-    100% 75% at 45% 108%,
+    145% 115% at 45% 108%,
     #f2581b 0%,
-    rgba(226, 80, 26, 0.72) 34%,
-    transparent 72%
+    rgba(226, 80, 26, 0.88) 45%,
+    transparent 88%
   );
   --g-shade: linear-gradient(transparent, transparent);
   --g-drop: rgba(18, 28, 98, 0.6);
