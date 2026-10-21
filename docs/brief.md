@@ -29,7 +29,7 @@ The build is deliberately small: one scoring system, a leaderboard with a clear 
 
 **Out, until the experiment says otherwise:**
 
-- Apple Health or Health Connect sync.
+- Apple Health, Health Connect or Garmin sync. These are the planned long-term source of runs (see Open decisions) but need a native app or a partner agreement, so they wait for evidence.
 - Native apps and push notifications.
 - Tag, territory, shared journey, clubs and leagues.
 - A generic framework for future game modes.
@@ -236,7 +236,8 @@ Free web app where friends play three-week running seasons, each scored against 
 
 ## Open decisions
 
-- [ ] **Strava.** Decided: runs import from Strava from the start, with manual logging as a fallback. New Strava apps can connect 10 athletes without review; apply for a higher limit early. Still ask Strava's developer team in writing whether crew leaderboards built on points derived from a user's activities comply with the API agreement.
+- [ ] **Strava (decided for the experiment, with a known risk).** Runs import from Strava and show in the crew feed, with manual logging as a fallback. This is for a small private crew only. Strava's API terms (since Nov 2024) say an app may show a user's Strava data only to that user, so showing it to crew mates may breach them, and Strava could revoke the app. Mitigations: Strava stays one adapter behind the `source` field and can be switched off without touching scoring; stay within 10 athletes; ask developers@strava.com in writing. If Strava objects, fall back to manual logging.
+- [ ] **Direct-from-device sources.** The long-term plan is to take runs straight from the watch or phone (Apple Health via a native iOS app, Garmin via its developer programme, Health Connect on Android) instead of through Strava. Each is one more adapter writing the same `activities` row.
 - [ ] **Baselines.** Self-reported for season one. After the simulator review, decide whether the plan band alone is enough to stop sandbagging.
 - [ ] **Injury and holiday freeze.** Left out of v1. Revisit if anyone drops out mid-season.
 - [ ] **The two other crews.** Recruit both organisers before milestone 5, so the season can start as soon as the build is ready.
