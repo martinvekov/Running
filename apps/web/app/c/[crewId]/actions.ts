@@ -1,8 +1,10 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { londonDate, rulesV1, validateCommitment } from '@crew/engine';
 import { getCrewContext, getSeasonView } from '@/lib/season-data';
+import { cleanComment } from '@/lib/comments';
 import { lookBackWindow } from '@/lib/lookback-window';
 import { outcomeQuery } from '@/lib/strava-outcome';
 import { syncStrava } from '@/lib/strava-sync';
@@ -197,4 +199,47 @@ export async function importHistory(formData: FormData) {
   const window = lookBackWindow(londonDate(new Date().toISOString()));
   const outcomes = await syncStrava([user.id], window.historyFrom, { force: true, maxPages: 10 });
   redirect(`/c/${crewId}/preseason?${outcomeQuery(outcomes)}`);
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Like a run, or take your like back if you already gave one. */
+export async function toggleLike(formData: FormData) {
+  const crewId = crewIdOf(formData);
+  const activityId = text(formData, 'activityId');
+  if (!UUID.test(activityId)) return;
+  const { supabase, user } = await getCrewContext(crewId);
+  const { data: existing } = await supabase
+    .from('run_likes')
+    .select('user_id')
+    .eq('activity_id', activityId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (existing) {
+    await supabase.from('run_likes').delete().eq('activity_id', activityId).eq('user_id', user.id);
+  } else {
+    await supabase.from('run_likes').insert({ activity_id: activityId, user_id: user.id });
+  }
+  revalidatePath(`/c/${crewId}`, 'layout');
+}
+
+/** Add a comment to a run. */
+export async function addComment(formData: FormData) {
+  const crewId = crewIdOf(formData);
+  const activityId = text(formData, 'activityId');
+  const body = cleanComment(formData.get('body'));
+  if (!UUID.test(activityId) || !body) return;
+  const { supabase, user } = await getCrewContext(crewId);
+  await supabase.from('run_comments').insert({ activity_id: activityId, user_id: user.id, body });
+  revalidatePath(`/c/${crewId}`, 'layout');
+}
+
+/** Delete one of your own comments. */
+export async function deleteComment(formData: FormData) {
+  const crewId = crewIdOf(formData);
+  const id = text(formData, 'id');
+  if (!UUID.test(id)) return;
+  const { supabase, user } = await getCrewContext(crewId);
+  await supabase.from('run_comments').delete().eq('id', id).eq('user_id', user.id);
+  revalidatePath(`/c/${crewId}`, 'layout');
 }

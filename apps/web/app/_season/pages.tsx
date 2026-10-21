@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { Kudos } from './client';
 import {
@@ -29,6 +30,7 @@ import {
   WeekTabs,
 } from './ui';
 import { leadLine } from './lead';
+import { SocialBar } from './run-social';
 import type { SeasonView } from './view';
 
 export function FeedScreen({ view, earlier }: { view: SeasonView; earlier?: number }) {
@@ -88,7 +90,15 @@ function counted(ctx: RunContext): [string, string] {
   }
 }
 
-export function RunScreen({ view, id }: { view: SeasonView; id: string }) {
+export function RunScreen({
+  view,
+  id,
+  footer,
+}: {
+  view: SeasonView;
+  id: string;
+  footer?: ReactNode;
+}) {
   const { result, runnerName, runnersById, runContexts } = view;
   const ctx = runContexts.get(id);
   if (!ctx) notFound();
@@ -123,7 +133,11 @@ export function RunScreen({ view, id }: { view: SeasonView; id: string }) {
           </span>
         </Link>
         <RunFigures ctx={ctx} size="hero" />
-        {view.demo && <Kudos initial={kudos} names={kudos.by.map(runnerName)} />}
+        {view.demo ? (
+          <Kudos initial={kudos} names={kudos.by.map(runnerName)} />
+        ) : (
+          <SocialBar view={view} activityId={id} showLatest={false} />
+        )}
       </header>
 
       <section className="section">
@@ -203,6 +217,7 @@ export function RunScreen({ view, id }: { view: SeasonView; id: string }) {
           </ul>
         </Link>
       )}
+      {footer}
     </main>
   );
 }
@@ -429,6 +444,70 @@ export function RunnerScreen({ view, id }: { view: SeasonView; id: string }) {
           )}
         </section>
       ))}
+    </main>
+  );
+}
+
+/** A run outside the season: the same card and conversation, with no scoring. */
+export function PastRunScreen({
+  view,
+  id,
+  footer,
+}: {
+  view: SeasonView;
+  id: string;
+  footer?: ReactNode;
+}) {
+  const run = view.outsideRuns.find((r) => r.id === id);
+  if (!run) notFound();
+  const when = run.runDate < view.input.season.startDate ? 'Pre-season' : 'Post-season';
+  return (
+    <main className="page with-tabbar">
+      <Link href={view.base} className="back">
+        ← Feed
+      </Link>
+      <header className="run-head">
+        <div className="item-head">
+          <Monogram name={view.runnerName(run.runnerId)} size={36} />
+          <span className="item-who">
+            {view.runnerName(run.runnerId)}
+            <small>{formatDay(run.runDate)}</small>
+          </span>
+          <span className="pts-badge zero">Not scored</span>
+        </div>
+        <div className="figures size-hero">
+          <div className="figures-top">
+            <span className="figures-tags">
+              <span className="glass">{run.source === 'strava' ? 'Strava' : 'Manual'}</span>
+            </span>
+          </div>
+          <p className="figure-main">
+            {(run.distanceM / 1000).toFixed(2)}
+            <span>km</span>
+          </p>
+          <dl className="figure-grid">
+            <div>
+              <dt>Time</dt>
+              <dd>{formatDuration(run.durationS)}</dd>
+            </div>
+            <div>
+              <dt>Pace</dt>
+              <dd>{formatPace(run.durationS, run.distanceM).replace(' /km', '/km')}</dd>
+            </div>
+            <div>
+              <dt>Run</dt>
+              <dd>{when}</dd>
+            </div>
+          </dl>
+        </div>
+        <SocialBar view={view} activityId={id} showLatest={false} />
+      </header>
+      {run.linkUrl && (
+        <a href={run.linkUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">
+          Open on Strava
+        </a>
+      )}
+      {footer}
     </main>
   );
 }

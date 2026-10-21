@@ -1805,57 +1805,357 @@ button {
   color: var(--dim);
 }
 
-/* Runs outside the season, as compact rows. */
-.past-item {
-  padding: 4px 8px;
+.feed > .btn-secondary {
+  align-self: stretch;
 }
 
-.past-row {
-  display: flex;
-  align-items: center;
+/* A leader highlight never touches the row below it. */
+.leader .row {
+  margin-block: 2px;
+}
+
+.table li + li.leader {
+  margin-top: 4px;
+}
+
+.score-table tbody tr:last-child th,
+.score-table tbody tr:last-child td {
+  padding-bottom: 4px;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Feed refresh: sharper, flatter, more editorial. Hairlines instead of shadows, tighter
+   corners, flat graphite plates, and type doing the work that gradients and pills did.
+   ------------------------------------------------------------------------------------------ */
+
+:root {
+  --radius: 12px;
+  --hair: rgba(22, 24, 29, 0.08);
+  --plate: #131519;
+  --plate-line: rgba(255, 255, 255, 0.12);
+  --shadow: none;
+}
+
+.section,
+.item {
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+
+.item {
+  gap: 14px;
+  padding: 16px 16px 6px;
+}
+
+.avatar {
+  background: var(--plate);
+}
+
+.item-head {
   gap: 12px;
-  min-height: 56px;
-  padding: 6px 4px;
 }
 
-.past-main,
-.past-figures {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.past-main {
-  flex: 1;
-}
-
-.past-who {
+.item-who {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 650;
+  letter-spacing: -0.015em;
 }
 
-.past-main small,
-.past-figures small {
+.item-who small {
+  margin-top: 1px;
   font-size: 12px;
+  letter-spacing: 0;
+}
+
+/* Points become a plain caps label instead of a pill. */
+.pts-badge {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+
+.pts-badge.zero {
+  background: none;
   color: var(--dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.past-figures {
-  align-items: flex-end;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+/* The run plate: flat graphite, big numerals, a hairline-ruled stat row. */
+.figures {
+  gap: 16px;
+  padding: 16px 16px 14px;
+  border-radius: 8px;
+  background: var(--plate);
 }
 
-.past-figures strong {
+.figures-top {
+  justify-content: flex-start;
+  opacity: 1;
+}
+
+.figures-tags {
+  gap: 14px;
+}
+
+.glass {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.glass::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.figure-main {
+  font-size: 60px;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.88;
+}
+
+.figure-main span {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.size-hero .figure-main {
+  font-size: 84px;
+  margin: 8px 0 4px;
+}
+
+.figure-grid {
+  gap: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--plate-line);
+  border-radius: 0;
+  background: none;
+}
+
+.figure-grid > div {
+  padding: 0 12px;
+  border-left: 1px solid var(--plate-line);
+}
+
+.figure-grid > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.figure-grid dt {
+  margin-bottom: 3px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.figure-grid dd {
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 650;
   letter-spacing: -0.02em;
 }
 
-.feed > .btn-secondary {
-  align-self: stretch;
+.size-hero {
+  border-radius: 8px;
+}
+
+/* Progress against the commitment: a thin square-ended rule. */
+.item-progress {
+  gap: 6px;
+}
+
+.bar {
+  height: 4px;
+  border-radius: 1px;
+}
+
+.bar-fill,
+.bar-prev {
+  border-radius: 1px;
+}
+
+.overtake {
+  border-radius: 8px;
+  background: var(--plate);
+}
+
+.commit {
+  border-radius: 8px;
+}
+
+/* Likes and comments. */
+.social {
+  margin-top: 2px;
+  padding-top: 2px;
+  border-top: 1px solid var(--hair);
+}
+
+.social-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 12px 0 6px;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.social-btn:active {
+  opacity: 0.55;
+}
+
+.social-btn.liked {
+  color: var(--accent-ink);
+}
+
+.social-by {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.latest-comment {
+  display: block;
+  padding: 0 4px 12px;
+}
+
+.latest-comment p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.latest-comment strong {
+  font-weight: 650;
+}
+
+.latest-comment small {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+/* The thread on a run's page. */
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.thread li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.thread li + li {
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+}
+
+.thread-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--plate);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.thread-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.thread-main small {
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.thread-body {
+  margin-top: 2px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.thread .link-quiet {
+  min-height: 32px;
+  font-size: 12px;
+}
+
+.composer {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.composer .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.composer .btn-primary {
+  flex: none;
+  width: auto;
+  padding: 0 20px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }

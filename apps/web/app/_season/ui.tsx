@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { maxWeeklyPoints, rulesV1, type RuleId, type StandingRow } from '@crew/engine';
 import { leadLine } from './lead';
+import { SocialBar } from './run-social';
 import type { SeasonView } from './view';
 import { Kudos } from './client';
 import type { FeedItem, RunContext } from './feed';
@@ -147,7 +148,10 @@ export function StandingsTable({
       )}
       <ol className="table">
         {rows.map((row) => (
-          <li key={row.runnerId} className={row.rank === 1 ? 'leader' : undefined}>
+          <li
+            key={row.runnerId}
+            className={row.rank === 1 && rows[1]?.rank !== 1 ? 'leader' : undefined}
+          >
             <Link href={`${view.base}/runner/${row.runnerId}`} className="row">
               <span className="row-rank">{row.rank}</span>
               <Monogram name={view.runnerName(row.runnerId)} size={38} />
@@ -546,7 +550,11 @@ function RunItem({ view, item }: { view: SeasonView; item: Extract<FeedItem, { k
           <Bar pct={ctx.pctAfter} from={ctx.pctBefore} />
         </div>
       )}
-      {view.demo && <Kudos {...kudosFor(view, item.id, ctx.runnerId)} />}
+      {view.demo ? (
+        <Kudos {...kudosFor(view, item.id, ctx.runnerId)} />
+      ) : (
+        <SocialBar view={view} activityId={ctx.run.activityId} />
+      )}
     </article>
   );
 }
@@ -667,41 +675,57 @@ function PastRunItem({
   view: SeasonView;
   item: Extract<FeedItem, { kind: 'past' }>;
 }) {
-  const km = (item.distanceM / 1000).toFixed(2);
-  const row = (
-    <>
-      <Monogram name={view.runnerName(item.runnerId)} size={32} />
-      <span className="past-main">
-        <span className="past-who">{view.runnerName(item.runnerId)}</span>
-        <small>
-          {formatDay(item.runDate)} · {item.source === 'strava' ? 'Strava' : 'Manual'} · Not scored
-        </small>
-      </span>
-      <span className="past-figures">
-        <strong>{km} km</strong>
-        <small>
-          {formatDuration(item.durationS)} ·{' '}
-          {formatPace(item.durationS, item.distanceM).replace(' /km', '/km')}
-        </small>
-      </span>
-    </>
+  const start = view.input.season.startDate;
+  const figures = (
+    <div className="figures size-feed">
+      <div className="figures-top">
+        <span className="figures-tags">
+          <span className="glass">{item.source === 'strava' ? 'Strava' : 'Manual'}</span>
+        </span>
+      </div>
+      <p className="figure-main">
+        {(item.distanceM / 1000).toFixed(2)}
+        <span>km</span>
+      </p>
+      <dl className="figure-grid">
+        <div>
+          <dt>Time</dt>
+          <dd>{formatDuration(item.durationS)}</dd>
+        </div>
+        <div>
+          <dt>Pace</dt>
+          <dd>{formatPace(item.durationS, item.distanceM).replace(' /km', '/km')}</dd>
+        </div>
+        <div>
+          <dt>Run</dt>
+          <dd>{item.runDate < start ? 'Pre-season' : 'Post-season'}</dd>
+        </div>
+      </dl>
+    </div>
   );
   return (
-    <article className="item past-item">
+    <article className="item">
+      <ItemHead
+        view={view}
+        runnerId={item.runnerId}
+        right={formatDay(item.runDate)}
+        badge={<span className="pts-badge zero">Not scored</span>}
+      />
       {item.linkUrl ? (
-        <a href={item.linkUrl} target="_blank" rel="noopener noreferrer" className="past-row">
-          {row}
+        <a href={item.linkUrl} target="_blank" rel="noopener noreferrer" className="item-body">
+          {figures}
         </a>
       ) : (
-        <div className="past-row">{row}</div>
+        <div className="item-body">{figures}</div>
       )}
+      <SocialBar view={view} activityId={item.id.replace(/^past-/, '')} />
     </article>
   );
 }
 
 export const EARLIER_STEP = 15;
 
-/** The crew feed. Runs outside the season are listed compactly, a few at a time. */
+/** The crew feed. Runs outside the season are shown as cards too, a few at a time. */
 export function Feed({ view, earlier = EARLIER_STEP }: { view: SeasonView; earlier?: number }) {
   let shownPast = 0;
   const items = view.feed.filter((item) => {
