@@ -729,7 +729,8 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  min-height: 44px;
+  padding: 6px 14px;
   border: 0;
   border-radius: 999px;
   background: var(--bg);
@@ -1595,4 +1596,106 @@ button.link-quiet {
 
 .block-list details[open] summary {
   border-bottom: 1px solid var(--track);
+}
+
+/* Touch: every control is at least 44px tall, answers a tap with a visible press, and never
+   waits for a double-tap delay. */
+
+a,
+button,
+summary,
+label,
+select,
+input {
+  touch-action: manipulation;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-primary,
+.btn-secondary,
+.seg-item,
+.tabbar-item,
+.back,
+.row,
+.item-body,
+.how-summary,
+.link-more,
+.link-quiet {
+  transition:
+    transform 80ms ease-out,
+    opacity 80ms ease-out;
+}
+
+.btn-primary:active:not(:disabled),
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+.seg-item:active,
+.tabbar-item:active,
+.back:active,
+.link-more:active,
+.link-quiet:active,
+.row:active,
+.item-body:active,
+.how-summary:active {
+  opacity: 0.6;
+}
+
+.seg-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 16px;
+}
+
+.link-more,
+.link-quiet {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 8px;
+  margin-inline: -8px;
+}
+
+.item-head {
+  min-height: 44px;
+}
+
+.item-who {
+  justify-content: center;
+  min-height: 44px;
+}
+
+.how-summary {
+  min-height: 48px;
+}
+
+.score-table tbody th a {
+  display: inline-block;
+  padding-block: 12px;
+}
+
+.run-row {
+  min-height: 48px;
+}
+
+.tabbar-item {
+  min-height: 44px;
+}
+
+.ring-cell {
+  min-height: 44px;
+  padding-block: 2px;
 }

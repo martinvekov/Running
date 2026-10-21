@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { NotConnected } from '@/components/not-connected';
 import { requireUser } from '@/lib/auth';
 import { cleanCrewName, MAX_CREW_NAME_LENGTH } from '@/lib/names';
+import { SubmitButton } from '@/components/submit-button';
 import { supabaseEnv } from '@/lib/supabase/env';
 
 export const metadata: Metadata = { title: 'New crew · Crew Seasons' };
@@ -47,9 +48,9 @@ export default async function NewCrewPage({
         {error === 'save' && (
           <p className="error-note">Couldn&apos;t create the crew. Please try again.</p>
         )}
-        <button type="submit" className="btn-primary">
+        <SubmitButton className="btn-primary" pending="Creating…">
           Create crew
-        </button>
+        </SubmitButton>
       </form>
     </main>
   );

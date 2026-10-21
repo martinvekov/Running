@@ -137,9 +137,9 @@ export default async function LogPage({
                 </form>
                 <form action={disconnectStrava}>
                   <input type="hidden" name="crewId" value={crewId} />
-                  <button type="submit" className="link-quiet">
+                  <SubmitButton className="link-quiet" pending="Disconnecting…">
                     Disconnect
-                  </button>
+                  </SubmitButton>
                 </form>
               </div>
             </div>
@@ -167,7 +167,7 @@ export default async function LogPage({
             <input type="hidden" name="crewId" value={crewId} />
             <label className="field">
               <span>Distance (km)</span>
-              <input name="km" inputMode="decimal" placeholder="8.2" required autoFocus />
+              <input name="km" inputMode="decimal" placeholder="8.2" required />
             </label>
             <label className="field">
               <span>Time (minutes, or 45:30)</span>
@@ -199,9 +199,9 @@ export default async function LogPage({
                 </span>
               </label>
             )}
-            <button type="submit" className="btn-primary">
+            <SubmitButton className="btn-primary" pending="Logging…">
               Log run
-            </button>
+            </SubmitButton>
           </form>
           <p className="caption">
             Log a run within two days of running it, or it won’t count. Only one run a day earns
@@ -260,9 +260,9 @@ export default async function LogPage({
                     />
                   </label>
                 </div>
-                <button type="submit" className="btn-secondary">
+                <SubmitButton className="btn-secondary" pending="Saving…">
                   Commit for week {w.weekIndex + 1}
-                </button>
+                </SubmitButton>
               </form>
             );
           })}
@@ -284,9 +284,9 @@ export default async function LogPage({
                   <form action={deleteRun}>
                     <input type="hidden" name="crewId" value={crewId} />
                     <input type="hidden" name="id" value={run.id as string} />
-                    <button type="submit" className="link-quiet">
+                    <SubmitButton className="link-quiet" pending="Deleting…">
                       Delete
-                    </button>
+                    </SubmitButton>
                   </form>
                 ) : (
                   <span />

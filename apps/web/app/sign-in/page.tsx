@@ -13,6 +13,7 @@ import { cleanDisplayName, MAX_NAME_LENGTH } from '@/lib/names';
 import { safeNext } from '@/lib/next-path';
 import { supabaseEnv } from '@/lib/supabase/env';
 import { createClient } from '@/lib/supabase/server';
+import { SubmitButton } from '@/components/submit-button';
 import { SignInButton } from './sign-in-button';
 
 export const metadata: Metadata = { title: 'Sign in · Crew Seasons' };
@@ -149,9 +150,9 @@ export default async function SignInPage({
         </label>
         {error && <p className="error-note">{MESSAGES[error] ?? MESSAGES.failed}</p>}
         {error && reference && <p className="muted small">Reference: {reference}</p>}
-        <button type="submit" className="btn-primary">
+        <SubmitButton className="btn-primary" pending="Working…">
           {mode === 'create' ? 'Create account' : 'Sign in'}
-        </button>
+        </SubmitButton>
       </form>
 
       {GOOGLE_ENABLED && (
