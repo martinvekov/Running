@@ -1,20 +1,21 @@
 :root {
-  --bg: #000;
-  --surface: #0f0f10;
-  --surface-2: #19191b;
-  --surface-3: #232326;
-  --border: #222225;
-  --fg: #fff;
-  --muted: #8e8e93;
+  --bg: #fff;
+  --surface: #f5f5f5;
+  --surface-2: #ebebed;
+  --surface-3: #dcdce0;
+  --border: #e6e6e9;
+  --fg: #111;
+  --muted: #707072;
+  --accent: #111;
   --volt: #d6ff38;
-  --volt-ink: #0b0f00;
-  --up: #3ddc84;
-  --down: #ff5a5f;
-  --warn: #ffb547;
-  --strava: #fc5200;
+  --volt-ink: #111;
+  --up: #128a3e;
+  --down: #d43f3a;
+  --warn: #b5650a;
+  --strava: #e34a00;
   --radius: 22px;
   --display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -131,7 +132,7 @@ small {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--volt);
+  color: var(--accent);
 }
 
 /* Cards */
@@ -163,7 +164,7 @@ small {
 }
 
 .link-more {
-  color: var(--volt);
+  color: var(--accent);
   font-weight: 700;
   font-size: 0.85rem;
 }
@@ -186,13 +187,13 @@ small {
   display: flex;
   justify-content: space-around;
   padding: 0.45rem;
-  background: rgba(20, 20, 22, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 999px;
   backdrop-filter: blur(18px) saturate(1.4);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   z-index: 20;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .tabbar-item {
@@ -236,11 +237,11 @@ small {
   place-items: center;
   padding: 3.5px;
   border-radius: 50%;
-  background: conic-gradient(#d1d1d6 var(--pct), #2c2c30 0);
+  background: conic-gradient(#111 var(--pct), var(--surface-3) 0);
 }
 
 .avatar-ring.done {
-  background: conic-gradient(var(--volt) var(--pct), #2c2c30 0);
+  background: conic-gradient(#b8e600 var(--pct), var(--surface-3) 0);
 }
 
 .avatar-ring .avatar {
@@ -286,7 +287,10 @@ small {
 }
 
 .feed-card {
-  background: var(--surface);
+  background: var(--bg);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 0.9rem;
@@ -336,8 +340,8 @@ small {
 }
 
 .tag.up {
-  background: rgba(214, 255, 56, 0.14);
-  color: var(--volt);
+  background: var(--volt);
+  color: var(--volt-ink);
 }
 
 /* Run poster: the hero block on feed cards and run pages. */
@@ -349,8 +353,8 @@ small {
   border-radius: 16px;
   padding: 0.9rem 1rem 1rem;
   background:
-    radial-gradient(130% 90% at 100% 0%, hsl(var(--hue) 70% 30% / 0.75), transparent 60%),
-    radial-gradient(80% 80% at 0% 100%, hsl(var(--hue) 80% 20% / 0.6), transparent 70%), #0b0b0c;
+    radial-gradient(130% 90% at 100% 0%, hsl(var(--hue) 85% 78% / 0.9), transparent 60%),
+    radial-gradient(80% 80% at 0% 100%, hsl(var(--hue) 80% 88% / 0.8), transparent 70%), #f4f4f5;
   isolation: isolate;
 }
 
@@ -358,11 +362,7 @@ small {
   content: '';
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    115deg,
-    rgba(255, 255, 255, 0.035) 0 2px,
-    transparent 2px 14px
-  );
+  background: repeating-linear-gradient(115deg, rgba(0, 0, 0, 0.035) 0 2px, transparent 2px 14px);
   z-index: -1;
 }
 
@@ -374,7 +374,7 @@ small {
 
 .poster-day {
   font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(0, 0, 0, 0.75);
 }
 
 .poster-distance {
@@ -387,7 +387,7 @@ small {
 .poster-distance span {
   font-size: 1.6rem;
   margin-left: 0.3rem;
-  color: var(--volt);
+  color: var(--accent);
 }
 
 .poster.large {
@@ -415,7 +415,7 @@ small {
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .poster-stats strong {
@@ -432,7 +432,7 @@ small {
 }
 
 .status-ok {
-  color: var(--volt);
+  color: var(--accent);
 }
 
 .status-muted {
@@ -476,8 +476,8 @@ small {
 }
 
 .reaction.active {
-  background: rgba(214, 255, 56, 0.14);
-  border-color: var(--volt);
+  background: var(--volt);
+  border-color: #b8e600;
 }
 
 .reaction-count {
@@ -494,8 +494,8 @@ small {
 /* Overtake and week wrap */
 
 .overtake {
-  background: linear-gradient(135deg, rgba(214, 255, 56, 0.16), transparent 55%), var(--surface);
-  border-color: rgba(214, 255, 56, 0.3);
+  background: linear-gradient(135deg, rgba(214, 255, 56, 0.55), transparent 60%), var(--surface);
+  border-color: #c9ee2f;
 }
 
 .overtake-body,
@@ -518,7 +518,7 @@ small {
 }
 
 .overtake-arrow {
-  color: var(--volt);
+  color: var(--accent);
   font-size: 0.9rem;
 }
 
@@ -544,7 +544,7 @@ small {
 }
 
 .podium li:first-child .podium-rank {
-  color: var(--volt);
+  color: var(--accent);
 }
 
 .podium-pts {
@@ -584,15 +584,15 @@ small {
 }
 
 .progress-fill {
-  background: #c7c7cc;
+  background: #111;
 }
 
 .progress-fill.done {
-  background: var(--volt);
+  background: #9fd400;
 }
 
 .progress-prev {
-  background: #5a5a60;
+  background: #a3a3a8;
   z-index: 1;
 }
 
@@ -606,7 +606,7 @@ small {
   padding: 1.2rem;
   border-radius: var(--radius);
   background:
-    radial-gradient(120% 120% at 100% 0%, rgba(214, 255, 56, 0.28), transparent 55%), var(--surface);
+    radial-gradient(120% 120% at 100% 0%, rgba(214, 255, 56, 0.6), transparent 60%), var(--surface);
   border: 1px solid var(--border);
 }
 
@@ -618,7 +618,7 @@ small {
 
 .hero-points {
   font-size: 2rem;
-  color: var(--volt);
+  color: var(--accent);
 }
 
 .hero-points span {
@@ -678,7 +678,7 @@ small {
 }
 
 .rank-1 {
-  color: var(--volt);
+  color: var(--accent);
 }
 
 .standing-name {
@@ -743,7 +743,7 @@ small {
 }
 
 .rules li span:last-child {
-  color: var(--volt);
+  color: var(--accent);
   font-weight: 700;
 }
 
@@ -761,7 +761,7 @@ small {
   width: 2.8rem;
   height: 2.8rem;
   border-radius: 14px;
-  background: rgba(255, 181, 71, 0.15);
+  background: rgba(255, 170, 40, 0.18);
   color: var(--warn);
   font-size: 1.3rem;
 }
@@ -812,7 +812,7 @@ small {
   font-weight: 800;
   text-transform: uppercase;
   font-size: 1.2rem;
-  color: var(--volt);
+  color: var(--accent);
   text-align: center;
 }
 
@@ -831,7 +831,7 @@ small {
 }
 
 .pill.draw {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.08);
   color: var(--fg);
 }
 
@@ -870,7 +870,7 @@ small {
 
 .finish-line {
   margin-top: 0.4rem;
-  color: var(--volt);
+  color: var(--accent);
   font-weight: 700;
   font-size: 0.88rem;
 }
@@ -901,12 +901,12 @@ small {
 
 .bar-fill {
   width: 100%;
-  background: #4a4a50;
+  background: #c4c4c9;
   border-radius: 8px;
 }
 
 .bar.this .bar-fill {
-  background: var(--volt);
+  background: #9fd400;
 }
 
 .bar small {
@@ -915,7 +915,7 @@ small {
 }
 
 .bar.this small {
-  color: var(--volt);
+  color: var(--accent);
 }
 
 .duel-teaser {
@@ -1054,12 +1054,12 @@ small {
   font-style: italic;
   font-weight: 800;
   font-size: 1.4rem;
-  color: var(--volt);
+  color: var(--accent);
   white-space: nowrap;
 }
 
 .line-pts.zero {
-  color: var(--surface-3);
+  color: #b4b4b9;
 }
 
 .runs {
@@ -1134,32 +1134,32 @@ small {
 }
 
 .chip.ok {
-  background: rgba(214, 255, 56, 0.14);
-  color: var(--volt);
+  background: var(--volt);
+  color: var(--volt-ink);
 }
 
 .chip.muted {
-  background: rgba(142, 142, 147, 0.16);
+  background: rgba(0, 0, 0, 0.06);
   color: var(--muted);
 }
 
 .chip.warn {
-  background: rgba(255, 181, 71, 0.15);
+  background: rgba(255, 170, 40, 0.18);
   color: var(--warn);
 }
 
 .chip.source.strava {
-  background: rgba(252, 82, 0, 0.18);
+  background: rgba(252, 82, 0, 0.12);
   color: var(--strava);
 }
 
 .chip.source.manual {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.75);
+  background: rgba(0, 0, 0, 0.07);
+  color: #3a3a3c;
 }
 
 .chip.bounty-chip {
-  background: rgba(255, 181, 71, 0.15);
+  background: rgba(255, 170, 40, 0.18);
   color: var(--warn);
 }
 
@@ -1180,8 +1180,9 @@ small {
 }
 
 .landing h1 em {
-  color: var(--volt);
   font-style: italic;
+  background: linear-gradient(transparent 58%, var(--volt) 58%);
+  padding: 0 0.1em;
 }
 
 .cta {

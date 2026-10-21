@@ -209,7 +209,9 @@ function RunCard({ item }: { item: Extract<FeedItem, { kind: 'run' }> }) {
         when={`Week ${ctx.weekIndex + 1}`}
         extra={
           ctx.runNumber !== undefined
-            ? `run ${ctx.runNumber} of ${ctx.commitment.runs}`
+            ? ctx.runNumber <= ctx.commitment.runs
+              ? `run ${ctx.runNumber} of ${ctx.commitment.runs}`
+              : `run ${ctx.runNumber}, beyond their ${ctx.commitment.runs}`
             : RUN_STATUS[ctx.run.status]!.label.toLowerCase()
         }
       />
