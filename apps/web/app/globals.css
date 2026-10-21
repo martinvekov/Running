@@ -18,7 +18,7 @@
   --cream: #faeee4;
   --ember: linear-gradient(135deg, #cc5a2c 0%, #b04420 50%, #7e2e18 100%);
   /* Film grain: neutral grey noise blended over a colour with `overlay`, so it lightens and darkens it. */
-  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 1'/><feComponentTransfer><feFuncR type='linear' slope='1.5' intercept='-0.25'/><feFuncG type='linear' slope='1.5' intercept='-0.25'/><feFuncB type='linear' slope='1.5' intercept='-0.25'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 1'/><feComponentTransfer><feFuncR type='linear' slope='1.9' intercept='-0.55'/><feFuncG type='linear' slope='1.9' intercept='-0.55'/><feFuncB type='linear' slope='1.9' intercept='-0.55'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   --radius: 18px;
   --shadow: 0 1px 2px rgba(60, 30, 10, 0.05), 0 4px 14px rgba(60, 30, 10, 0.04);
   --sans: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -1895,10 +1895,10 @@ button {
   isolation: isolate;
   gap: 18px;
   padding: 18px 18px 16px;
-  border-radius: 14px;
+  border-radius: 24px;
   background: var(--grain), var(--g-glow), var(--g-shade), var(--g-base);
   background-blend-mode: overlay, normal, normal, normal;
-  background-size: 180px, auto, auto, auto;
+  background-size: 140px, auto, auto, auto;
   box-shadow: 0 10px 22px -14px var(--g-drop);
 }
 
@@ -1916,46 +1916,46 @@ button {
   right: -26px;
   width: 170px;
   height: 140px;
-  opacity: 0.09;
+  opacity: 0.16;
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 160'><g fill='%23faeee4'><polygon points='34,6 154,6 140,28 20,28'/><polygon points='62,38 182,38 168,60 48,60'/><polygon points='34,70 154,70 140,92 20,92'/><polygon points='62,102 182,102 168,124 48,124'/><polygon points='34,134 154,134 140,156 20,156'/></g></svg>")
     no-repeat center / contain;
   pointer-events: none;
 }
 
-/* One gradient per person, all from the same warm family. */
+/* One gradient per person: electric blue through violet and coral to orange. */
 .tone-0 {
-  --g-base: linear-gradient(150deg, #c4572b 0%, #a43e1b 50%, #6b2813 100%);
-  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(235, 160, 110, 0.26), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(30, 8, 5, 0.5), transparent 64%);
-  --g-drop: rgba(120, 40, 15, 0.6);
+  --g-base: linear-gradient(135deg, #1f3fd8 0%, #4b3fc4 28%, #c4405a 58%, #f07a2c 85%, #ffb877 100%);
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(75, 63, 196, 0.55);
 }
 
 .tone-1 {
-  --g-base: linear-gradient(150deg, #cc8638 0%, #b4562a 50%, #772f17 100%);
-  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(240, 200, 130, 0.28), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(40, 12, 5, 0.5), transparent 64%);
-  --g-drop: rgba(150, 80, 30, 0.55);
+  --g-base: linear-gradient(150deg, #2a5ae0 0%, #7a3fc0 30%, #d4466a 62%, #f58f3a 100%);
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(122, 63, 192, 0.5);
 }
 
 .tone-2 {
-  --g-base: linear-gradient(150deg, #a8411c 0%, #772a19 52%, #3b150f 100%);
-  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(225, 140, 100, 0.22), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(15, 4, 4, 0.55), transparent 64%);
-  --g-drop: rgba(90, 30, 15, 0.6);
+  --g-base: linear-gradient(120deg, #2f35c0 0%, #6a3aa8 35%, #bf3a52 68%, #e8662a 100%);
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(106, 58, 168, 0.5);
 }
 
 .tone-3 {
-  --g-base: linear-gradient(150deg, #bb5b3d 0%, #8e3a3a 50%, #4b2038 100%);
-  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(235, 160, 130, 0.24), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(30, 6, 22, 0.5), transparent 64%);
-  --g-drop: rgba(110, 40, 50, 0.55);
+  --g-base: linear-gradient(160deg, #1f6fd8 0%, #5a4fc8 30%, #cc4f6a 60%, #f0a040 100%);
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(90, 79, 200, 0.5);
 }
 
 .tone-4 {
-  --g-base: linear-gradient(150deg, #b6793f 0%, #874926 52%, #3d2415 100%);
-  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(230, 195, 140, 0.24), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(30, 10, 4, 0.5), transparent 64%);
-  --g-drop: rgba(100, 55, 25, 0.55);
+  --g-base: linear-gradient(140deg, #3a3fd0 0%, #8a3aa0 35%, #d8503e 70%, #ffb060 100%);
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(138, 58, 160, 0.5);
 }
 
 /* Avatars share their person's gradient. */
@@ -2056,7 +2056,7 @@ button {
 }
 
 .size-hero {
-  border-radius: 8px;
+  border-radius: 28px;
 }
 
 /* Progress against the commitment: a thin square-ended rule. */
@@ -2075,7 +2075,7 @@ button {
 }
 
 .overtake {
-  border-radius: 14px;
+  border-radius: 24px;
   background: var(--grain), var(--g-glow), var(--g-shade), var(--g-base);
   background-blend-mode: overlay, normal, normal, normal;
   background-size: 180px, auto, auto, auto;
