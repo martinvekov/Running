@@ -51,7 +51,7 @@ export function SocialBar({
               strokeLinejoin="round"
             />
           </svg>
-          <span>{social.commentCount > 0 ? social.commentCount : 'Comment'}</span>
+          {social.commentCount > 0 && <span>{social.commentCount}</span>}
         </Link>
         {likedBy && <span className="social-by">{likedBy}</span>}
       </div>

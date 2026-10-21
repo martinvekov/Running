@@ -2309,3 +2309,99 @@ button {
   background: var(--track);
   color: var(--ink-2);
 }
+
+/* ------------------------------------------------------------------------------------------
+   Full-bleed feed: posts run edge to edge with a plain strip between them. The colour block has
+   no inset, border or rounded corners, and the like and comment controls are quiet line icons.
+   ------------------------------------------------------------------------------------------ */
+
+.feed {
+  gap: 0;
+}
+
+.feed .item {
+  gap: 0;
+  margin-inline: -16px;
+  padding: 0;
+  border: 0;
+  border-bottom: 8px solid var(--track);
+  border-radius: 0;
+  background: none;
+}
+
+.feed .item > *:not(.item-body) {
+  margin-inline: 16px;
+}
+
+.feed .item > .overtake {
+  margin-inline: 0;
+  border-radius: 0;
+}
+
+.feed .item-head {
+  min-height: 0;
+  padding-block: 12px;
+}
+
+.feed .item-progress {
+  padding-top: 12px;
+}
+
+.feed .figures {
+  min-height: 244px;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 20px 20px;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.feed .figures::after {
+  top: -10px;
+  right: -30px;
+  width: 210px;
+  height: 172px;
+}
+
+.feed .figure-main {
+  margin: 0;
+  font-size: 52px;
+}
+
+.feed .figure-main span {
+  font-size: 11px;
+}
+
+.feed .figure-grid dt {
+  font-size: 9.5px;
+}
+
+.feed .figure-grid dd {
+  font-size: 15px;
+}
+
+.feed .social {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.feed .social-btn {
+  gap: 6px;
+  padding: 0 16px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.social-btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+.social-btn svg path {
+  stroke-width: 1.4;
+}
+
+.feed .latest-comment {
+  padding: 0 0 14px;
+}
