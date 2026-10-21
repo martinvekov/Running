@@ -234,7 +234,6 @@ Free web app where friends play three-week running seasons, each scored against 
 
 ## Open decisions
 
-- [ ] **Talos contract.** Check the IP and outside-activity clauses before the first commit.
 - [ ] **Strava.** Ask Strava's developer team in writing whether crew leaderboards built on points derived from a user's activities comply with the API agreement. Only after a yes does a Strava adapter replace manual entry.
 - [ ] **Baselines.** Self-reported for season one. After the simulator review, decide whether the plan band alone is enough to stop sandbagging.
 - [ ] **Injury and holiday freeze.** Left out of v1. Revisit if anyone drops out mid-season.
