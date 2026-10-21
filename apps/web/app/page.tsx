@@ -1,13 +1,23 @@
-import { WEEK_TIME_ZONE } from '@crew/engine';
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="container">
-      <h1>Crew Seasons</h1>
-      <p>
-        Three-week running seasons with your crew, each runner scored against their own baseline.
+    <main className="page landing">
+      <span className="label">Crew Seasons</span>
+      <h1>
+        Three weeks.
+        <br />
+        Your crew.
+        <br />
+        Anyone can win.
+      </h1>
+      <p className="note">
+        Commit to your runs every Sunday. Keep your word, win your duel. Everyone is scored against
+        their own baseline, so pace never counts.
       </p>
-      <p className="muted">Coming soon. Weeks run Monday to Sunday, {WEEK_TIME_ZONE} time.</p>
+      <Link href="/demo" className="cta">
+        View the demo season
+      </Link>
     </main>
   );
 }
