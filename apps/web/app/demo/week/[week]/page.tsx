@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { result, runnerName } from '../../_lib/data';
 import { formatDay, formatKm, formatShortDate } from '../../_lib/format';
-import { Avatar, DemoHeader, Progress, StandingsList, WeekTabs } from '../../_lib/ui';
+import { Avatar, PageTitle, Progress, StandingsList, WeekTabs } from '../../_lib/ui';
 
 export function generateStaticParams() {
   return result.weeks.map((w) => ({ week: String(w.weekIndex + 1) }));
@@ -26,9 +26,11 @@ export default async function DemoWeekPage({ params }: { params: Promise<{ week:
   const runners = [...week.runners].sort((a, b) => b.points - a.points);
 
   return (
-    <main className="page">
-      <DemoHeader
-        subtitle={`Week ${week.weekIndex + 1} · ${formatShortDate(week.startDate)} – ${formatShortDate(week.endDate)} · ${week.status === 'closed' ? 'Closed' : week.status === 'open' ? 'In progress' : 'Upcoming'}`}
+    <main className="page with-tabbar">
+      <PageTitle
+        title={`Week ${week.weekIndex + 1}`}
+        chip={week.status === 'closed' ? 'Final' : week.status === 'open' ? 'Live' : 'Soon'}
+        sub={`${formatShortDate(week.startDate)} – ${formatShortDate(week.endDate)} · duels, bounty and scores`}
       />
       <WeekTabs active={week.weekIndex + 1} weeks={result.weeks.length} />
 
@@ -88,7 +90,7 @@ export default async function DemoWeekPage({ params }: { params: Promise<{ week:
                 <div className="week-score-body">
                   <div className="duel-row">
                     <strong>{runnerName(rw.runnerId)}</strong>
-                    <span className="points small-points">
+                    <span className="points small-points display">
                       {rw.points}
                       <small>pts</small>
                     </span>

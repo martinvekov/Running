@@ -42,15 +42,15 @@ export default async function DemoRunnerPage({ params }: { params: Promise<{ id:
   const totalS = counted.reduce((s, r) => s + r.durationS, 0);
 
   return (
-    <main className="page">
-      <Link href="/demo" className="back">
-        ← Standings
+    <main className="page with-tabbar">
+      <Link href="/demo/standings" className="back">
+        ← Leaderboard
       </Link>
 
       <header className="profile">
         <Avatar id={id} size={72} />
         <div>
-          <h1>{runner.name}</h1>
+          <h1 className="display">{runner.name}</h1>
           <p className="muted">{runner.persona}</p>
           <p className="muted small">
             Baseline {runner.baselineKm} km · {runner.baselineRuns} runs a week
@@ -58,12 +58,12 @@ export default async function DemoRunnerPage({ params }: { params: Promise<{ id:
         </div>
         <div className="profile-points">
           <span className="rank-badge">#{standing.rank}</span>
-          <strong>{standing.points}</strong>
+          <strong className="display">{standing.points}</strong>
           <small>pts</small>
         </div>
       </header>
 
-      <section className="stats">
+      <section className="stats display-stats">
         <div>
           <strong>{totalKm.toFixed(1)}</strong>
           <small>Season km</small>
@@ -91,7 +91,7 @@ export default async function DemoRunnerPage({ params }: { params: Promise<{ id:
                 {formatShortDate(week.startDate)} – {formatShortDate(week.endDate)}
               </small>
             </h2>
-            <span className="points">
+            <span className="points display">
               {rw.points}
               <small>pts</small>
             </span>
@@ -129,24 +129,27 @@ export default async function DemoRunnerPage({ params }: { params: Promise<{ id:
               {rw.runs.map((run) => {
                 const status = RUN_STATUS[run.status]!;
                 return (
-                  <li key={run.activityId} className="run">
-                    <div className="run-date">
-                      <strong>{formatDay(run.runDate).split(' ')[0]}</strong>
-                      <small>{formatShortDate(run.runDate)}</small>
-                    </div>
-                    <div className="run-main">
-                      <strong>{formatKm(run.distanceM / 1000)}</strong>
-                      <small className="muted">
-                        {formatDuration(run.durationS)} · {formatPace(run.durationS, run.distanceM)}
-                      </small>
-                    </div>
-                    <div className="run-tags">
-                      <span className={`chip ${status.tone}`}>{status.label}</span>
-                      <span className={`chip source ${run.source}`}>
-                        {run.source === 'strava' ? 'Strava' : 'Manual'}
-                      </span>
-                      {run.bountyClaimed && <span className="chip bounty-chip">★ Bounty</span>}
-                    </div>
+                  <li key={run.activityId}>
+                    <Link href={`/demo/run/${run.activityId}`} className="run">
+                      <div className="run-date">
+                        <strong>{formatDay(run.runDate).split(' ')[0]}</strong>
+                        <small>{formatShortDate(run.runDate)}</small>
+                      </div>
+                      <div className="run-main">
+                        <strong>{formatKm(run.distanceM / 1000)}</strong>
+                        <small className="muted">
+                          {formatDuration(run.durationS)} ·{' '}
+                          {formatPace(run.durationS, run.distanceM)}
+                        </small>
+                      </div>
+                      <div className="run-tags">
+                        <span className={`chip ${status.tone}`}>{status.label}</span>
+                        <span className={`chip source ${run.source}`}>
+                          {run.source === 'strava' ? 'Strava' : 'Manual'}
+                        </span>
+                        {run.bountyClaimed && <span className="chip bounty-chip">★ Bounty</span>}
+                      </div>
+                    </Link>
                   </li>
                 );
               })}
