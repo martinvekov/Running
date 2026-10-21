@@ -6,7 +6,7 @@ import { NotConnected } from '@/components/not-connected';
 import { SubmitButton } from '@/components/submit-button';
 import { outcomeMessage } from '@/lib/strava-outcome';
 import { LOOK_BACK_BLOCKS, lookBackWindow } from '@/lib/lookback-window';
-import { getCrewContext } from '@/lib/season-data';
+import { getCrewContext, memberName } from '@/lib/season-data';
 import { stravaAvailable } from '@/lib/strava-sync';
 import { supabaseEnv } from '@/lib/supabase/env';
 import { importHistory } from '../actions';
@@ -34,19 +34,19 @@ export default async function PreSeasonPage({
   const { crewId } = await params;
   const query = await searchParams;
   const message = outcomeMessage(query);
-  const { supabase, user, crew } = await getCrewContext(crewId);
+  const { supabase, user, crew, members } = await getCrewContext(crewId);
   const window = lookBackWindow(londonDate(new Date().toISOString()));
 
-  const { data: members } = await supabase
-    .from('crew_members')
-    .select('user_id, profiles(display_name)')
-    .eq('crew_id', crewId);
-  const runners = (members ?? []).map((m) => {
-    const p = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
-    return { id: m.user_id as string, name: (p?.display_name as string | undefined) ?? 'Runner' };
-  });
+  const runners = members.map((m) => ({ id: m.user_id, name: memberName(m) }));
   const ids = runners.map((r) => r.id);
   const names = new Map(runners.map((r) => [r.id, r.name]));
+
+  // Asked at the same time as the runs below.
+  const stravaQuery = supabase
+    .from('strava_connections')
+    .select('connected_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
 
   // Row Level Security shows you your own runs and your crew mates'. The API returns at most
   // 1000 rows a request, so read in pages.
@@ -87,11 +87,7 @@ export default async function PreSeasonPage({
   const played = result.blocks.filter((b) => b.result).length;
   const scored = result.totals.filter((t) => t.blocksPlayed > 0).length;
   const winner = result.totals[0];
-  const { data: strava } = await supabase
-    .from('strava_connections')
-    .select('connected_at')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const { data: strava } = await stravaQuery;
 
   return (
     <main className="page with-tabbar">

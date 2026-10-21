@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { commitmentBands, londonDate, rulesV1 } from '@crew/engine';
+import { addDays, commitmentBands, londonDate, rulesV1 } from '@crew/engine';
 import { formatDay, formatDuration, formatKm, formatShortDate } from '@/app/_season/format';
 import { Label } from '@/app/_season/ui';
 import { NotConnected } from '@/components/not-connected';
@@ -60,8 +60,26 @@ export default async function LogPage({
   const query = await searchParams;
   const { error, saved } = query;
   const stravaMessage = outcomeMessage(query);
-  const { supabase, user } = await getCrewContext(crewId);
-  const view = await getSeasonView(crewId);
+  const { supabase, user, season: seasonRow } = await getCrewContext(crewId);
+  if (!seasonRow || seasonRow.status === 'setup') redirect(`/c/${crewId}/crew`);
+  // The season view, your Strava status and your runs are all asked for at once.
+  const seasonEnd = addDays(seasonRow.start_date, 20);
+  const [view, { data: strava }, { data: mine }] = await Promise.all([
+    getSeasonView(crewId),
+    supabase
+      .from('strava_connections')
+      .select('connected_at, last_synced_at')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+    supabase
+      .from('activities')
+      .select('id, run_date, distance_m, duration_s, source')
+      .eq('user_id', user.id)
+      .gte('run_date', seasonRow.start_date)
+      .lte('run_date', seasonEnd)
+      .order('run_date', { ascending: false })
+      .order('created_at', { ascending: false }),
+  ]);
   if (!view) redirect(`/c/${crewId}/crew`);
 
   const today = londonDate(new Date().toISOString());
@@ -74,23 +92,9 @@ export default async function LogPage({
   const last = weeks.at(-1)!.endDate;
   const bounties = view.input.bounties;
 
-  const { data: strava } = await supabase
-    .from('strava_connections')
-    .select('connected_at, last_synced_at')
-    .eq('user_id', user.id)
-    .maybeSingle();
   const syncedMinutes = strava?.last_synced_at
     ? Math.max(0, Math.round((Date.now() - Date.parse(strava.last_synced_at as string)) / 60_000))
     : null;
-
-  const { data: mine } = await supabase
-    .from('activities')
-    .select('id, run_date, distance_m, duration_s, source')
-    .eq('user_id', user.id)
-    .gte('run_date', first)
-    .lte('run_date', last)
-    .order('run_date', { ascending: false })
-    .order('created_at', { ascending: false });
 
   return (
     <main className="page with-tabbar">
