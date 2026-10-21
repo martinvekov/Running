@@ -21,9 +21,14 @@ function Landing({ connected }: { connected: boolean }) {
         their own baseline, so pace never matters.
       </p>
       {connected && (
-        <Link href="/sign-in" className="btn-primary">
-          Sign in
-        </Link>
+        <>
+          <Link href="/sign-in?mode=create" className="btn-primary">
+            Create account
+          </Link>
+          <Link href="/sign-in" className="link-quiet">
+            I already have an account
+          </Link>
+        </>
       )}
       <Link href="/demo" className={connected ? 'link-quiet' : 'cta'}>
         {connected ? 'Or look at the demo season' : 'View the demo season'}

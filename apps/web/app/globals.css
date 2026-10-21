@@ -1490,3 +1490,16 @@ button {
 .member-list li .chip {
   margin-left: auto;
 }
+
+.auth-page {
+  padding-top: max(40px, env(safe-area-inset-top));
+  gap: 16px;
+}
+
+.auth-page h1 {
+  font-size: 2.4rem;
+}
+
+.stack .btn-primary {
+  width: 100%;
+}

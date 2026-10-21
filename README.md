@@ -24,7 +24,7 @@ The app needs two public values (see `apps/web/.env.example`), set locally in `a
 - `NEXT_PUBLIC_SUPABASE_URL`: the project address.
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: the project's publishable (anon) key. It is public by design; Row Level Security protects the data.
 
-Without them the app still runs: the demo works and other pages say the app isn't connected yet. Sign-in is Google only for now (email links need a custom email sender). Configure it in Supabase under Authentication, then Sign In / Providers and URL Configuration.
+Without them the app still runs: the demo works and other pages say the app isn't connected yet. Sign-in is email and password, so anyone with the link can join without a domain or an email sender. In Supabase, under Authentication, then Sign In / Providers, then Email, turn **Confirm email** off (sign-up needs no email). There is no password-reset email; reset a password from Authentication, then Users, in the Supabase dashboard. Google sign-in is built but hidden: set `NEXT_PUBLIC_ENABLE_GOOGLE=true` to show it, but it only admits listed test users until the Google app is published, which needs a domain.
 
 ## Layout
 
