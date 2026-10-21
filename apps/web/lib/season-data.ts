@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
+import { after } from 'next/server';
 import type { Activity, Bounty, Commitment, Runner, SeasonInput } from '@crew/engine';
 import { buildSeasonView, type OutsideRun, type SeasonView } from '@/app/_season/view';
 import { requireUser } from './auth';
@@ -42,18 +43,20 @@ export const getCrewContext = cache(async (crewId: string) => {
   if (!UUID.test(crewId)) notFound();
   const { supabase, user } = await requireUser(`/c/${crewId}`);
   // Row Level Security means a non-member gets nothing back, which reads as "not found".
-  const { data: crew } = await supabase
-    .from('crews')
-    .select('id, name, invite_code, organiser_id')
-    .eq('id', crewId)
-    .maybeSingle();
+  const [{ data: crew }, { data: seasons }] = await Promise.all([
+    supabase
+      .from('crews')
+      .select('id, name, invite_code, organiser_id')
+      .eq('id', crewId)
+      .maybeSingle(),
+    supabase
+      .from('seasons')
+      .select('id, number, start_date, status, rules_version')
+      .eq('crew_id', crewId)
+      .order('number', { ascending: false })
+      .limit(1),
+  ]);
   if (!crew) notFound();
-  const { data: seasons } = await supabase
-    .from('seasons')
-    .select('id, number, start_date, status, rules_version')
-    .eq('crew_id', crewId)
-    .order('number', { ascending: false })
-    .limit(1);
   const season = ((seasons ?? [])[0] ?? null) as SeasonRow | null;
   return {
     supabase,
@@ -68,11 +71,15 @@ export const getCrewContext = cache(async (crewId: string) => {
 export const getSeasonView = cache(async (crewId: string): Promise<SeasonView | null> => {
   const { supabase, crew, season } = await getCrewContext(crewId);
   if (!season || season.status === 'setup') return null;
-  if (season.status === 'active') await syncSeasonStrava(season);
-  const { data } = await supabase.rpc('season_snapshot', { p_season: season.id });
+  // New Strava runs are fetched after the page has been sent, so a slow Strava never holds up
+  // a tap. They show on the next view.
+  if (season.status === 'active') after(() => syncSeasonStrava(season));
+  const [{ data }, { outsideRuns, otherNames }] = await Promise.all([
+    supabase.rpc('season_snapshot', { p_season: season.id }),
+    loadOutsideRuns(crewId),
+  ]);
   const input = snapshotToInput(data as Snapshot, new Date().toISOString());
   if (!input) return null;
-  const { outsideRuns, otherNames } = await loadOutsideRuns(crewId, input);
   return buildSeasonView(input, {
     base: `/c/${crewId}`,
     crewName: crew.name,
@@ -107,7 +114,7 @@ const OUTSIDE_RUN_LIMIT = 200;
  * include. Row Level Security gives you your own runs and your crew mates'. They are shown in
  * the feed but never scored.
  */
-async function loadOutsideRuns(crewId: string, input: SeasonInput) {
+async function loadOutsideRuns(crewId: string) {
   const { supabase } = await getCrewContext(crewId);
   const { data: members } = await supabase
     .from('crew_members')
@@ -128,18 +135,16 @@ async function loadOutsideRuns(crewId: string, input: SeasonInput) {
     .order('run_date', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(OUTSIDE_RUN_LIMIT);
-  const inSeason = new Set(input.activities.map((a) => a.id));
-  const outsideRuns: OutsideRun[] = (data ?? [])
-    .filter((a) => !inSeason.has(a.id as string))
-    .map((a) => ({
-      id: a.id as string,
-      runnerId: a.user_id as string,
-      source: a.source as 'manual' | 'strava',
-      runDate: a.run_date as string,
-      durationS: a.duration_s as number,
-      distanceM: a.distance_m as number,
-      loggedAt: a.created_at as string,
-      ...(a.link_url ? { linkUrl: a.link_url as string } : {}),
-    }));
+  // Runs inside the season are dropped when the view is built.
+  const outsideRuns: OutsideRun[] = (data ?? []).map((a) => ({
+    id: a.id as string,
+    runnerId: a.user_id as string,
+    source: a.source as 'manual' | 'strava',
+    runDate: a.run_date as string,
+    durationS: a.duration_s as number,
+    distanceM: a.distance_m as number,
+    loggedAt: a.created_at as string,
+    ...(a.link_url ? { linkUrl: a.link_url as string } : {}),
+  }));
   return { outsideRuns, otherNames };
 }
