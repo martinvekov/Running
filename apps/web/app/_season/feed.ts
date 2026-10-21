@@ -1,3 +1,4 @@
+import type { OutsideRun } from './view';
 import {
   scoreSeason,
   type SeasonInput,
@@ -27,7 +28,20 @@ export interface RunContext {
   showUpPoints: number;
 }
 
+export interface PastRunItem {
+  kind: 'past';
+  id: string;
+  at: string;
+  runnerId: string;
+  runDate: string;
+  durationS: number;
+  distanceM: number;
+  source: 'manual' | 'strava';
+  linkUrl?: string;
+}
+
 export type FeedItem =
+  | PastRunItem
   | { kind: 'run'; id: string; at: string; ctx: RunContext }
   | {
       kind: 'commit';
@@ -53,6 +67,7 @@ export type FeedItem =
 export function buildFeedData(
   fixture: SeasonInput,
   result: SeasonResult,
+  outsideRuns: OutsideRun[] = [],
 ): { runContexts: Map<string, RunContext>; feed: FeedItem[] } {
   const activityById = new Map(fixture.activities.map((a) => [a.id, a]));
   const snapshots = new Map<number, SeasonResult>();
@@ -183,6 +198,20 @@ export function buildFeedData(
           activityId: ctx.run.activityId,
         });
       }
+    }
+
+    for (const r of outsideRuns) {
+      items.push({
+        kind: 'past',
+        id: `past-${r.id}`,
+        at: r.loggedAt,
+        runnerId: r.runnerId,
+        runDate: r.runDate,
+        durationS: r.durationS,
+        distanceM: r.distanceM,
+        source: r.source,
+        ...(r.linkUrl ? { linkUrl: r.linkUrl } : {}),
+      });
     }
 
     return items.sort((a, b) => b.at.localeCompare(a.at) || a.id.localeCompare(b.id));

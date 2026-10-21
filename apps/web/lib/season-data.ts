@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import type { Activity, Bounty, Commitment, Runner, SeasonInput } from '@crew/engine';
-import { buildSeasonView, type SeasonView } from '@/app/_season/view';
+import { buildSeasonView, type OutsideRun, type SeasonView } from '@/app/_season/view';
 import { requireUser } from './auth';
 import { adminClient, syncStrava } from './strava-sync';
 
@@ -72,10 +72,13 @@ export const getSeasonView = cache(async (crewId: string): Promise<SeasonView | 
   const { data } = await supabase.rpc('season_snapshot', { p_season: season.id });
   const input = snapshotToInput(data as Snapshot, new Date().toISOString());
   if (!input) return null;
+  const { outsideRuns, otherNames } = await loadOutsideRuns(crewId, input);
   return buildSeasonView(input, {
     base: `/c/${crewId}`,
     crewName: crew.name,
     seasonNumber: season.number,
+    outsideRuns,
+    otherNames,
   });
 });
 
@@ -95,4 +98,48 @@ async function syncSeasonStrava(season: SeasonRow) {
   } catch {
     // The feed still renders from what is already saved.
   }
+}
+
+const OUTSIDE_RUN_LIMIT = 200;
+
+/**
+ * Every run the crew has logged, most recent first, that the season's scoring window does not
+ * include. Row Level Security gives you your own runs and your crew mates'. They are shown in
+ * the feed but never scored.
+ */
+async function loadOutsideRuns(crewId: string, input: SeasonInput) {
+  const { supabase } = await getCrewContext(crewId);
+  const { data: members } = await supabase
+    .from('crew_members')
+    .select('user_id, profiles(display_name)')
+    .eq('crew_id', crewId);
+  const otherNames: Record<string, string> = {};
+  for (const m of members ?? []) {
+    const p = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
+    otherNames[m.user_id as string] = (p?.display_name as string | undefined) ?? 'Runner';
+  }
+  const ids = Object.keys(otherNames);
+  if (ids.length === 0) return { outsideRuns: [] as OutsideRun[], otherNames };
+
+  const { data } = await supabase
+    .from('activities')
+    .select('id, user_id, source, run_date, duration_s, distance_m, link_url, created_at')
+    .in('user_id', ids)
+    .order('run_date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(OUTSIDE_RUN_LIMIT);
+  const inSeason = new Set(input.activities.map((a) => a.id));
+  const outsideRuns: OutsideRun[] = (data ?? [])
+    .filter((a) => !inSeason.has(a.id as string))
+    .map((a) => ({
+      id: a.id as string,
+      runnerId: a.user_id as string,
+      source: a.source as 'manual' | 'strava',
+      runDate: a.run_date as string,
+      durationS: a.duration_s as number,
+      distanceM: a.distance_m as number,
+      loggedAt: a.created_at as string,
+      ...(a.link_url ? { linkUrl: a.link_url as string } : {}),
+    }));
+  return { outsideRuns, otherNames };
 }
