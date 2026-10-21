@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { NotConnected } from '@/components/not-connected';
+import { authErrorKey, cleanReference } from '@/lib/auth-errors';
 import {
   cleanEmail,
   cleanPassword,
@@ -25,8 +26,10 @@ async function authenticate(formData: FormData) {
   'use server';
   const mode = formData.get('mode') === 'create' ? 'create' : 'signin';
   const next = safeNext(String(formData.get('next') ?? ''));
-  const back = (error: string) =>
-    `/sign-in?mode=${mode}&next=${encodeURIComponent(next)}&error=${error}`;
+  const back = (error: string, reference?: string) =>
+    `/sign-in?mode=${mode}&next=${encodeURIComponent(next)}&error=${error}${
+      reference ? `&ref=${encodeURIComponent(reference)}` : ''
+    }`;
 
   const email = cleanEmail(formData.get('email'));
   if (!email) redirect(back('email'));
@@ -43,17 +46,7 @@ async function authenticate(formData: FormData) {
       password,
       options: { data: { display_name: name, onboarded: true } },
     });
-    if (error) {
-      redirect(
-        back(
-          error.code === 'user_already_exists'
-            ? 'exists'
-            : error.code === 'weak_password'
-              ? 'password'
-              : 'failed',
-        ),
-      );
-    }
+    if (error) redirect(back(authErrorKey(error.code), error.code ?? String(error.status ?? '')));
     // No session means the project still wants an email confirmed first.
     if (!data.session) redirect(back('confirm'));
     redirect(next);
@@ -62,7 +55,7 @@ async function authenticate(formData: FormData) {
   const password = formData.get('password');
   if (typeof password !== 'string' || password.length === 0) redirect(back('credentials'));
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) redirect(back(error.code === 'invalid_credentials' ? 'credentials' : 'failed'));
+  if (error) redirect(back(authErrorKey(error.code), error.code ?? String(error.status ?? '')));
   redirect(data.user.user_metadata?.onboarded ? next : `/welcome?next=${encodeURIComponent(next)}`);
 }
 
@@ -74,6 +67,11 @@ const MESSAGES: Record<string, string> = {
   credentials: 'That email and password don’t match.',
   confirm:
     'Sign-up is waiting on an email confirmation that isn’t switched off yet. Tell whoever runs this crew.',
+  rate_email:
+    'Too many sign-up emails have been sent. Wait an hour, or tell whoever runs this crew.',
+  rate: 'Too many attempts. Wait a minute and try again.',
+  signups_off: 'Sign-ups are switched off right now. Tell whoever runs this crew.',
+  email_blocked: 'This project can’t send email to that address yet. Tell whoever runs this crew.',
   failed: 'Something went wrong. Please try again.',
   '1': 'Sign-in didn’t complete. Please try again.',
 };
@@ -81,10 +79,11 @@ const MESSAGES: Record<string, string> = {
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string; mode?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; mode?: string; ref?: string }>;
 }) {
   if (!supabaseEnv()) return <NotConnected />;
-  const { next, error, mode: rawMode } = await searchParams;
+  const { next, error, mode: rawMode, ref } = await searchParams;
+  const reference = cleanReference(ref);
   const dest = safeNext(next);
   const mode = rawMode === 'create' ? 'create' : 'signin';
 
@@ -149,6 +148,7 @@ export default async function SignInPage({
           />
         </label>
         {error && <p className="error-note">{MESSAGES[error] ?? MESSAGES.failed}</p>}
+        {error && reference && <p className="muted small">Reference: {reference}</p>}
         <button type="submit" className="btn-primary">
           {mode === 'create' ? 'Create account' : 'Sign in'}
         </button>
