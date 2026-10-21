@@ -3,6 +3,8 @@ import { londonDate, lookBack, type Activity } from '@crew/engine';
 import { formatShortDate } from '@/app/_season/format';
 import { Label, Monogram, ordinal } from '@/app/_season/ui';
 import { NotConnected } from '@/components/not-connected';
+import { SubmitButton } from '@/components/submit-button';
+import { outcomeMessage } from '@/lib/strava-outcome';
 import { LOOK_BACK_BLOCKS, lookBackWindow } from '@/lib/lookback-window';
 import { getCrewContext } from '@/lib/season-data';
 import { stravaAvailable } from '@/lib/strava-sync';
@@ -19,11 +21,19 @@ export default async function PreSeasonPage({
   searchParams,
 }: {
   params: Promise<{ crewId: string }>;
-  searchParams: Promise<{ saved?: string; error?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    strava?: string;
+    found?: string;
+    imported?: string;
+    http?: string;
+    detail?: string;
+  }>;
 }) {
   if (!supabaseEnv()) return <NotConnected />;
   const { crewId } = await params;
-  const { saved, error } = await searchParams;
+  const query = await searchParams;
+  const message = outcomeMessage(query);
   const { supabase, user, crew } = await getCrewContext(crewId);
   const window = lookBackWindow(londonDate(new Date().toISOString()));
 
@@ -95,8 +105,11 @@ export default async function PreSeasonPage({
         </p>
       </header>
 
-      {saved === 'imported' && <p className="note">Imported your Strava runs.</p>}
-      {error && <p className="error-note">Something went wrong. Please try again.</p>}
+      {message && (
+        <p className={message.tone === 'ok' ? 'note' : 'error-note'} role="status">
+          {message.text}
+        </p>
+      )}
 
       {winner && played > 0 && winner.points > 0 ? (
         <section className="section">
@@ -152,9 +165,9 @@ export default async function PreSeasonPage({
             </p>
             <form action={importHistory}>
               <input type="hidden" name="crewId" value={crewId} />
-              <button type="submit" className="btn-primary">
+              <SubmitButton pending="Importing from Strava… this can take 20 seconds">
                 Import last 7 months
-              </button>
+              </SubmitButton>
             </form>
           </div>
         ) : (

@@ -4,6 +4,8 @@ import { commitmentBands, londonDate, rulesV1 } from '@crew/engine';
 import { formatDay, formatDuration, formatKm, formatShortDate } from '@/app/_season/format';
 import { Label } from '@/app/_season/ui';
 import { NotConnected } from '@/components/not-connected';
+import { SubmitButton } from '@/components/submit-button';
+import { outcomeMessage } from '@/lib/strava-outcome';
 import { getCrewContext, getSeasonView } from '@/lib/season-data';
 import { supabaseEnv } from '@/lib/supabase/env';
 import { stravaAvailable } from '@/lib/strava-sync';
@@ -42,11 +44,22 @@ export default async function LogPage({
   searchParams,
 }: {
   params: Promise<{ crewId: string }>;
-  searchParams: Promise<{ error?: string; saved?: string; week?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    saved?: string;
+    week?: string;
+    strava?: string;
+    found?: string;
+    imported?: string;
+    http?: string;
+    detail?: string;
+  }>;
 }) {
   if (!supabaseEnv()) return <NotConnected />;
   const { crewId } = await params;
-  const { error, saved } = await searchParams;
+  const query = await searchParams;
+  const { error, saved } = query;
+  const stravaMessage = outcomeMessage(query);
   const { supabase, user } = await getCrewContext(crewId);
   const view = await getSeasonView(crewId);
   if (!view) redirect(`/c/${crewId}/crew`);
@@ -93,6 +106,11 @@ export default async function LogPage({
 
       {error && <p className="error-note">{MESSAGES[error] ?? MESSAGES.save}</p>}
       {saved && <p className="note">{SAVED[saved] ?? 'Saved.'}</p>}
+      {stravaMessage && (
+        <p className={stravaMessage.tone === 'ok' ? 'note' : 'error-note'} role="status">
+          {stravaMessage.text}
+        </p>
+      )}
 
       {me && stravaAvailable() && (
         <section className="section">
@@ -113,9 +131,9 @@ export default async function LogPage({
               <div className="button-row">
                 <form action={syncStravaNow}>
                   <input type="hidden" name="crewId" value={crewId} />
-                  <button type="submit" className="btn-secondary">
+                  <SubmitButton pending="Checking Strava…" className="btn-secondary">
                     Check for new runs
-                  </button>
+                  </SubmitButton>
                 </form>
                 <form action={disconnectStrava}>
                   <input type="hidden" name="crewId" value={crewId} />

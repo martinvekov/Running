@@ -81,15 +81,24 @@ async function freshAccessToken(admin: SupabaseClient, conn: Connection): Promis
   return t.access_token;
 }
 
-/** Import one runner's Strava runs from `sinceDate` (a London date) onwards. Returns how many are new. */
+/** What one runner's import did, so the app can say so instead of failing silently. */
+export type ImportOutcome =
+  | { status: 'ok'; found: number; imported: number }
+  | { status: 'not-connected' }
+  | { status: 'no-access'; httpStatus: number }
+  | { status: 'strava-error'; httpStatus: number }
+  | { status: 'save-error'; message: string }
+  | { status: 'unreachable' };
+
+/** Import one runner's Strava runs from `sinceDate` (a London date) onwards. */
 async function importRuns(
   admin: SupabaseClient,
   conn: Connection,
   sinceDate: string,
   maxPages: number,
-): Promise<number> {
+): Promise<ImportOutcome> {
   const token = await freshAccessToken(admin, conn);
-  if (!token) return 0;
+  if (!token) return { status: 'no-access', httpStatus: 401 };
   const after = Math.floor(Date.parse(`${sinceDate}T00:00:00Z`) / 1000) - 86_400;
 
   const runs = [];
@@ -98,7 +107,10 @@ async function importRuns(
       headers: { authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (!res.ok) break;
+    if (res.status === 401 || res.status === 403) {
+      return { status: 'no-access', httpStatus: res.status };
+    }
+    if (!res.ok) return { status: 'strava-error', httpStatus: res.status };
     const batch = (await res.json()) as StravaActivity[];
     for (const a of batch) {
       const run = mapStravaActivity(a);
@@ -106,7 +118,7 @@ async function importRuns(
     }
     if (batch.length < 100) break;
   }
-  if (runs.length === 0) return 0;
+  if (runs.length === 0) return { status: 'ok', found: 0, imported: 0 };
 
   const { data: existing } = await admin
     .from('activities')
@@ -119,7 +131,7 @@ async function importRuns(
     );
   const have = new Set((existing ?? []).map((r) => r.source_ref as string));
   const fresh = runs.filter((r) => !have.has(r.sourceRef));
-  if (fresh.length === 0) return 0;
+  if (fresh.length === 0) return { status: 'ok', found: runs.length, imported: 0 };
 
   const { error } = await admin.from('activities').insert(
     fresh.map((r) => ({
@@ -134,24 +146,26 @@ async function importRuns(
     })),
   );
   // A run that another request imported a moment ago trips the unique index: nothing is lost.
-  return error ? 0 : fresh.length;
+  if (error && error.code !== '23505') return { status: 'save-error', message: error.message };
+  return { status: 'ok', found: runs.length, imported: error ? 0 : fresh.length };
 }
 
 /**
  * Bring Strava runs in for these runners. Unless `force` is set, a runner is skipped if they
  * were synced in the last ten minutes. Never throws: Strava being slow must not break the app.
+ * Returns what happened for each runner that was synced.
  */
 export async function syncStrava(
   userIds: string[],
   sinceDate: string,
   options: { force?: boolean; maxPages?: number } = {},
-): Promise<void> {
+): Promise<ImportOutcome[]> {
   const admin = adminClient();
-  if (!admin || !stravaConfig() || userIds.length === 0) return;
+  if (!admin || !stravaConfig() || userIds.length === 0) return [];
   const cutoff = new Date(Date.now() - SYNC_INTERVAL_MS).toISOString();
 
-  await Promise.allSettled(
-    userIds.map(async (userId) => {
+  const settled = await Promise.allSettled(
+    userIds.map(async (userId): Promise<ImportOutcome | null> => {
       // Claim the sync first, so two people opening the app together do not both fetch.
       let claim = admin
         .from('strava_connections')
@@ -161,7 +175,13 @@ export async function syncStrava(
       const { data } = await claim
         .select('user_id, access_token, refresh_token, expires_at')
         .maybeSingle();
-      if (data) await importRuns(admin, data as Connection, sinceDate, options.maxPages ?? 3);
+      if (!data) return options.force ? { status: 'not-connected' } : null;
+      return importRuns(admin, data as Connection, sinceDate, options.maxPages ?? 3);
     }),
   );
+  return settled
+    .map((r): ImportOutcome | null =>
+      r.status === 'fulfilled' ? r.value : { status: 'unreachable' },
+    )
+    .filter((o): o is ImportOutcome => o !== null);
 }
