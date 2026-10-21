@@ -106,7 +106,7 @@ The data model is expected to change as we learn. A new table is fine; it is not
 
 ## Data model
 
-Ten tables cover the experiment. Points are never stored as source data; `week_results` is a cache the engine rewrites.
+These tables cover the experiment. Points are never stored as source data; `week_results` is a cache the engine rewrites.
 
 | Table | Key fields | Notes |
 | --- | --- | --- |
@@ -119,9 +119,12 @@ Ten tables cover the experiment. Points are never stored as source data; `week_r
 | `activities` | id, user\_id, source, source\_ref, run\_date, duration\_s, distance\_m, link\_url, bounty\_claimed\_week, created\_at | `source` is `strava` or `manual`; canonical for all future sources. No maps, GPS or heart rate, even from Strava |
 | `bounties` | season\_id, week\_index, title | One per week |
 | `events` | id, crew\_id, season\_id, type, actor\_id, payload, created\_at | Append-only: run logged, plan set, overtake, reaction, recap shared, season started |
+| `strava_connections` | user\_id, athlete\_id, access\_token, refresh\_token, expires\_at, connected\_at, last\_synced\_at | Strava sign-in. Tokens are never readable by signed-in users; only the server reads them |
+| `run_likes` | activity\_id, user\_id, created\_at | One like per person per run; you can take yours back |
+| `run_comments` | id, activity\_id, user\_id, body (1 to 280 characters), created\_at | Short comments on a run, shown to people who can see the run; you can delete your own, nobody can edit |
 | `week_results` | season\_id, user\_id, week\_index, points\_total, breakdown (JSON), rules\_version, computed\_at | Engine output cache; safe to delete and rebuild |
 
-Duel pairings are computed by the engine from the season id and member list, so they need no table. Reactions are stored as events.
+Duel pairings are computed by the engine from the season id and member list, so they need no table. Likes and comments on runs have their own tables (rather than events) so a person can take theirs back.
 
 ## Screens and flows
 

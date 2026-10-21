@@ -5,6 +5,7 @@ import {
   type SeasonInput,
   type SeasonResult,
 } from '@crew/engine';
+import type { RunSocial } from '@/lib/social-data';
 import { buildFeedData, weekDays, type FeedItem, type RunContext } from './feed';
 
 /** A runner as the screens see them. The demo crew has a one-line persona; real runners don't. */
@@ -32,6 +33,14 @@ export interface SeasonView {
   crewName: string;
   /** Demo seasons show example kudos and a "Demo" chip. */
   demo: boolean;
+  /** The crew's id, for forms that post back to it. Real crews only. */
+  crewId?: string;
+  /** The signed-in person, if any. */
+  meId?: string;
+  /** Likes and comments by run id. Empty for the demo. */
+  social: Map<string, RunSocial>;
+  /** Logged runs outside the season, newest first. */
+  outsideRuns: OutsideRun[];
   seasonNumber: number;
   input: SeasonInput;
   result: SeasonResult;
@@ -52,6 +61,9 @@ export function buildSeasonView(
     seasonNumber?: number;
     runners?: ViewRunner[];
     outsideRuns?: OutsideRun[];
+    crewId?: string;
+    meId?: string;
+    social?: Record<string, RunSocial>;
     /** Names for crew mates who are not in the season. */
     otherNames?: Record<string, string>;
   },
@@ -67,6 +79,10 @@ export function buildSeasonView(
     base: options.base,
     crewName: options.crewName,
     demo: options.demo ?? false,
+    ...(options.crewId ? { crewId: options.crewId } : {}),
+    ...(options.meId ? { meId: options.meId } : {}),
+    social: new Map(Object.entries(options.social ?? {})),
+    outsideRuns,
     seasonNumber: options.seasonNumber ?? 1,
     input,
     result,

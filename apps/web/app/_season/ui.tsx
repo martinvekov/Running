@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { maxWeeklyPoints, rulesV1, type RuleId, type StandingRow } from '@crew/engine';
 import { leadLine } from './lead';
+import { SocialBar } from './run-social';
 import type { SeasonView } from './view';
 import { Kudos } from './client';
 import type { FeedItem, RunContext } from './feed';
@@ -549,7 +550,11 @@ function RunItem({ view, item }: { view: SeasonView; item: Extract<FeedItem, { k
           <Bar pct={ctx.pctAfter} from={ctx.pctBefore} />
         </div>
       )}
-      {view.demo && <Kudos {...kudosFor(view, item.id, ctx.runnerId)} />}
+      {view.demo ? (
+        <Kudos {...kudosFor(view, item.id, ctx.runnerId)} />
+      ) : (
+        <SocialBar view={view} activityId={ctx.run.activityId} />
+      )}
     </article>
   );
 }
@@ -713,6 +718,7 @@ function PastRunItem({
       ) : (
         <div className="item-body">{figures}</div>
       )}
+      <SocialBar view={view} activityId={item.id.replace(/^past-/, '')} />
     </article>
   );
 }

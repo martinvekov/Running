@@ -4,6 +4,7 @@ import { after } from 'next/server';
 import type { Activity, Bounty, Commitment, Runner, SeasonInput } from '@crew/engine';
 import { buildSeasonView, type OutsideRun, type SeasonView } from '@/app/_season/view';
 import { requireUser } from './auth';
+import { loadRunSocial } from './social-data';
 import { adminClient, syncStrava } from './strava-sync';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -69,7 +70,7 @@ export const getCrewContext = cache(async (crewId: string) => {
 
 /** The crew's latest season, scored by the engine as of now. Null until a season has started. */
 export const getSeasonView = cache(async (crewId: string): Promise<SeasonView | null> => {
-  const { supabase, crew, season } = await getCrewContext(crewId);
+  const { supabase, crew, season, user } = await getCrewContext(crewId);
   if (!season || season.status === 'setup') return null;
   // New Strava runs are fetched after the page has been sent, so a slow Strava never holds up
   // a tap. They show on the next view.
@@ -80,8 +81,15 @@ export const getSeasonView = cache(async (crewId: string): Promise<SeasonView | 
   ]);
   const input = snapshotToInput(data as Snapshot, new Date().toISOString());
   if (!input) return null;
+  const social = await loadRunSocial(supabase, [
+    ...input.activities.map((a) => a.id),
+    ...outsideRuns.map((r) => r.id),
+  ]);
   return buildSeasonView(input, {
     base: `/c/${crewId}`,
+    crewId,
+    meId: user.id,
+    social,
     crewName: crew.name,
     seasonNumber: season.number,
     outsideRuns,
