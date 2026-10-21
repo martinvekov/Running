@@ -24,6 +24,7 @@ export default async function DemoWeekPage({ params }: { params: Promise<{ week:
   if (!week) notFound();
 
   const runners = [...week.runners].sort((a, b) => b.points - a.points);
+  const topRunner = runners[0];
   const status =
     week.status === 'closed' ? 'Final' : week.status === 'open' ? 'In progress' : 'Upcoming';
 
@@ -32,7 +33,11 @@ export default async function DemoWeekPage({ params }: { params: Promise<{ week:
       <Masthead
         kicker={fixture.crewName}
         title={`Week ${week.weekIndex + 1}`}
-        meta={`${formatShortDate(week.startDate)} – ${formatShortDate(week.endDate)} · ${status}`}
+        meta={
+          topRunner && week.status !== 'upcoming'
+            ? `${runnerName(topRunner.runnerId)} ${week.status === 'closed' ? 'won the week' : 'leads the week'} with ${topRunner.points} points · ${formatShortDate(week.startDate)} – ${formatShortDate(week.endDate)}`
+            : `${formatShortDate(week.startDate)} – ${formatShortDate(week.endDate)} · ${status}`
+        }
       />
       <WeekTabs active={week.weekIndex + 1} weeks={result.weeks.length} />
 
@@ -72,6 +77,11 @@ export default async function DemoWeekPage({ params }: { params: Promise<{ week:
                 </div>
               </Link>
             ))}
+            {duel.sides.length === 3 && (
+              <p className="caption">
+                Three-way duel: each runner is scored against both others and gets the average.
+              </p>
+            )}
             <Label className="duel-result">{duel.summary.replace(/\.$/, '')}</Label>
           </div>
         ))}

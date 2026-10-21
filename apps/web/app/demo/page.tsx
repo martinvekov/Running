@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { fixture, result } from './_lib/data';
 import { feed } from './_lib/feed';
 import { formatShortDate } from './_lib/format';
-import { CrewProgress, Feed, Masthead } from './_lib/ui';
+import { CrewProgress, Feed, HowItWorks, Masthead, StandingsCard } from './_lib/ui';
 
 export const metadata: Metadata = {
   title: 'Feed · Crew Seasons',
@@ -19,6 +19,8 @@ export default function DemoFeedPage() {
         title="Feed"
         meta={`Season 1 · ${formatShortDate(first.startDate)} – ${formatShortDate(last.endDate)}`}
       />
+      <StandingsCard />
+      <HowItWorks />
       <CrewProgress />
       <Feed items={feed} />
     </main>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import type { StandingRow } from '@crew/engine';
+import { rulesV1, type RuleId, type StandingRow } from '@crew/engine';
 import { fixture, result, runnerName, runnersById } from './data';
 import { Kudos } from './client';
 import type { FeedItem, RunContext } from './feed';
@@ -120,6 +120,7 @@ export function WeekTabs({ active, weeks }: { active: 'season' | number; weeks: 
 }
 
 export function StandingsTable({ rows, title }: { rows: StandingRow[]; title?: string }) {
+  const top = rows[0]?.points ?? 0;
   return (
     <section className="section">
       {title && (
@@ -138,6 +139,7 @@ export function StandingsTable({ rows, title }: { rows: StandingRow[]; title?: s
                 {runnerName(row.runnerId)}
                 <small>
                   {row.duelWins} duel {row.duelWins === 1 ? 'win' : 'wins'}
+                  {row.rank > 1 ? ` · ${top - row.points} behind` : ''}
                 </small>
               </span>
               <Movement value={row.movement} />
@@ -146,6 +148,150 @@ export function StandingsTable({ rows, title }: { rows: StandingRow[]; title?: s
           </li>
         ))}
       </ol>
+    </section>
+  );
+}
+
+/** The feed's opening card: who is winning, by how much, and how everyone compares. */
+export function StandingsCard() {
+  const rows = result.standings;
+  const [leader, second] = rows;
+  const finished = result.weeks.every((w) => w.status === 'closed');
+  const top = leader?.points ?? 1;
+  return (
+    <section className="section">
+      <div className="section-head">
+        <Label>{finished ? 'Final standings' : 'Standings'}</Label>
+        <Link href="/demo/standings" className="link-more">
+          Full table
+        </Link>
+      </div>
+      {leader && second && (
+        <p className="leadline">
+          <strong>{runnerName(leader.runnerId)}</strong> {finished ? 'won the season' : 'leads'} by{' '}
+          {leader.points - second.points} points
+        </p>
+      )}
+      <ol className="table compact">
+        {rows.map((row) => (
+          <li key={row.runnerId}>
+            <Link href={`/demo/runner/${row.runnerId}`} className="row">
+              <span className="row-rank">{row.rank}</span>
+              <Monogram id={row.runnerId} size={30} />
+              <span className="row-name">
+                <span className="row-name-top">
+                  {runnerName(row.runnerId)}
+                  <Movement value={row.movement} />
+                </span>
+                <Bar pct={(row.points / top) * 100} />
+              </span>
+              <span className="row-num">{row.points}</span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+const MAX_WEEK =
+  rulesV1.showUp.pointsPerRun * rulesV1.showUp.maxRuns +
+  rulesV1.keepWord[0]!.points +
+  rulesV1.ambition.maxPoints +
+  rulesV1.duel.win +
+  rulesV1.bounty.points;
+
+/** Three steps, in plain words, with the real numbers from the rules. */
+export function HowItWorks({ open = false }: { open?: boolean }) {
+  const r = rulesV1;
+  return (
+    <details className="section how" open={open}>
+      <summary className="how-summary">
+        <span>
+          <Label>How a week works</Label>
+          <span className="how-short">Commit · Run · Score, up to {MAX_WEEK} points</span>
+        </span>
+        <span className="how-chevron" aria-hidden />
+      </summary>
+      <ol className="how-steps">
+        <li>
+          <span className="how-n">1</span>
+          <p>
+            <strong>Commit.</strong> By Sunday 23:59, say how many runs and km you&apos;ll do next
+            week, within {r.commitmentBand.minKmPct}–{r.commitmentBand.maxKmPct}% of your usual.
+          </p>
+        </li>
+        <li>
+          <span className="how-n">2</span>
+          <p>
+            <strong>Run.</strong> Runs sync from Strava. Pace never counts, and neither does running
+            more than you committed.
+          </p>
+        </li>
+        <li>
+          <span className="how-n">3</span>
+          <p>
+            <strong>Score.</strong> {r.showUp.pointsPerRun} per run (up to {r.showUp.maxRuns}),{' '}
+            {r.keepWord[0]!.points} for keeping your word, up to {r.ambition.maxPoints} for
+            ambition, {r.duel.win} for winning your duel, {r.bounty.points} for the bounty.
+          </p>
+        </li>
+      </ol>
+    </details>
+  );
+}
+
+const RULE_COLUMNS: [RuleId, string][] = [
+  ['show-up', 'Runs'],
+  ['keep-word', 'Word'],
+  ['ambition', 'Ambit.'],
+  ['duel', 'Duel'],
+  ['bounty', 'Bounty'],
+];
+
+/** Season points split by rule, so it is obvious where each score came from. */
+export function PointsByRule() {
+  const totals = new Map<string, Record<string, number>>();
+  for (const week of result.weeks) {
+    for (const rw of week.runners) {
+      const t = totals.get(rw.runnerId) ?? {};
+      for (const line of rw.lines) t[line.rule] = (t[line.rule] ?? 0) + line.points;
+      totals.set(rw.runnerId, t);
+    }
+  }
+  return (
+    <section className="section">
+      <div className="section-head">
+        <Label>Where the points came from</Label>
+        <Label className="dim">Season</Label>
+      </div>
+      <table className="score-table">
+        <thead>
+          <tr>
+            <th />
+            {RULE_COLUMNS.map(([rule, label]) => (
+              <th key={rule}>{label}</th>
+            ))}
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {result.standings.map((row) => {
+            const t = totals.get(row.runnerId) ?? {};
+            return (
+              <tr key={row.runnerId}>
+                <th scope="row">
+                  <Link href={`/demo/runner/${row.runnerId}`}>{runnerName(row.runnerId)}</Link>
+                </th>
+                {RULE_COLUMNS.map(([rule]) => (
+                  <td key={rule}>{t[rule] ?? 0}</td>
+                ))}
+                <td className="total">{row.points}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </section>
   );
 }
@@ -159,13 +305,16 @@ export function CrewProgress() {
         <Label>Week {week.weekIndex + 1} commitments</Label>
         <Label className="dim">{week.status === 'closed' ? 'Final' : 'Live'}</Label>
       </div>
+      <p className="caption">
+        Each ring is a runner&apos;s km against their own target. Full ring = word kept.
+      </p>
       <ul className="rings">
         {fixture.runners.map((r) => {
           const rw = week.runners.find((x) => x.runnerId === r.id)!;
           return (
             <li key={r.id}>
               <Link href={`/demo/runner/${r.id}`} className="ring-cell">
-                <Ring id={r.id} pct={rw.kmPct} size={58} />
+                <Ring id={r.id} pct={rw.kmPct} size={52} />
                 <span>{r.name}</span>
               </Link>
             </li>
@@ -181,15 +330,39 @@ function kudosFor(itemId: string, authorId?: string) {
   return { initial: k, names: k.by.map(runnerName) };
 }
 
-function ItemHead({ runnerId, right }: { runnerId: string; right: string }) {
+function ItemHead({
+  runnerId,
+  right,
+  badge,
+}: {
+  runnerId: string;
+  right: string;
+  badge?: ReactNode;
+}) {
   return (
     <div className="item-head">
-      <Monogram id={runnerId} size={36} />
+      <Monogram id={runnerId} size={32} />
       <Link href={`/demo/runner/${runnerId}`} className="item-who">
         {runnerName(runnerId)}
         <small>{right}</small>
       </Link>
+      {badge}
     </div>
+  );
+}
+
+/** Points this run earned on its own: show-up points, up to the weekly cap. */
+export function runPoints(ctx: RunContext): number {
+  const { showUp } = rulesV1;
+  return ctx.runNumber !== undefined && ctx.runNumber <= showUp.maxRuns ? showUp.pointsPerRun : 0;
+}
+
+function PointsBadge({ ctx }: { ctx: RunContext }) {
+  const pts = runPoints(ctx);
+  return pts > 0 ? (
+    <span className="pts-badge">+{pts} pts</span>
+  ) : (
+    <span className="pts-badge zero">0 pts</span>
   );
 }
 
@@ -207,7 +380,6 @@ export function RunFigures({ ctx, size = 'feed' }: { ctx: RunContext; size?: 'fe
   return (
     <div className={`figures size-${size}`}>
       <div className="figures-top">
-        <span>{formatDay(run.runDate)}</span>
         <span className="figures-tags">
           {run.bountyClaimed && <span className="glass">Bounty</span>}
           <span className="glass">{run.source === 'strava' ? 'Strava' : 'Manual'}</span>
@@ -240,7 +412,11 @@ function RunItem({ item }: { item: Extract<FeedItem, { kind: 'run' }> }) {
   const counts = ctx.run.status === 'counted' || ctx.run.status === 'km-only';
   return (
     <article className="item">
-      <ItemHead runnerId={ctx.runnerId} right={`Week ${ctx.weekIndex + 1}`} />
+      <ItemHead
+        runnerId={ctx.runnerId}
+        right={`${formatDay(ctx.run.runDate)} · Week ${ctx.weekIndex + 1}`}
+        badge={<PointsBadge ctx={ctx} />}
+      />
       <Link href={`/demo/run/${ctx.run.activityId}`} className="item-body">
         <RunFigures ctx={ctx} />
       </Link>
@@ -248,11 +424,10 @@ function RunItem({ item }: { item: Extract<FeedItem, { kind: 'run' }> }) {
         <div className="item-progress">
           <div className="spread">
             <span className="small muted">
-              {ctx.completedCommitment
-                ? 'Commitment complete'
-                : `${Math.round(ctx.pctAfter)}% of ${formatKm(ctx.commitment.km)}`}
+              {Math.round(ctx.pctBefore)}% → {Math.round(ctx.pctAfter)}% of{' '}
+              {formatKm(ctx.commitment.km)} target
             </span>
-            <span className="small strong">+{Math.round(ctx.pctAfter - ctx.pctBefore)}%</span>
+            {ctx.completedCommitment && <span className="small kept">Word kept</span>}
           </div>
           <Bar pct={ctx.pctAfter} from={ctx.pctBefore} />
         </div>

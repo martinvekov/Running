@@ -6,7 +6,7 @@ import { runContexts, weekDays, type RunContext } from '../../_lib/feed';
 import { formatDay, formatKm } from '../../_lib/format';
 import { Kudos } from '../../_lib/client';
 import { demoKudos } from '../../_lib/social';
-import { Bar, Label, Monogram, RunFigures } from '../../_lib/ui';
+import { Bar, Label, Monogram, RunFigures, runPoints } from '../../_lib/ui';
 
 export function generateStaticParams() {
   return [...runContexts.keys()].map((id) => ({ id }));
@@ -89,6 +89,10 @@ export default async function DemoRunPage({ params }: { params: Promise<{ id: st
           <div>
             <dt>Status</dt>
             <dd>{statusDetail}</dd>
+          </div>
+          <div>
+            <dt>Points</dt>
+            <dd>{runPoints(ctx) > 0 ? `+${runPoints(ctx)} show-up` : '0, no show-up points'}</dd>
           </div>
           {qualifies && (
             <div>
