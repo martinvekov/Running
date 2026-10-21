@@ -101,7 +101,7 @@ describe('lookBack', () => {
     expect(result.totals.find((t) => t.runnerId === 'b')!.blocksWon).toBe(0);
   });
 
-  it('leaves out a runner with no history before a block, and skips a block with fewer than two runners', () => {
+  it('scores a block with just one runner who has history, and leaves out the rest', () => {
     const result = lookBack({
       rulesVersion: 'v1',
       runners,
@@ -109,11 +109,25 @@ describe('lookBack', () => {
       blocks: 1,
       activities: history('a', 3, 7),
     });
+    const block = result.blocks[0]!;
+    expect(block.result).not.toBeNull();
+    expect(block.result!.weeks[0]!.runners.map((r) => r.runnerId)).toEqual(['a']);
+    expect(result.totals.find((t) => t.runnerId === 'a')!.blocksPlayed).toBe(1);
+    expect(result.totals.find((t) => t.runnerId === 'a')!.points).toBeGreaterThan(0);
+    expect(result.totals.find((t) => t.runnerId === 'b')!.blocksPlayed).toBe(0);
+  });
+
+  it('skips a block where nobody has four weeks of history', () => {
+    const result = lookBack({
+      rulesVersion: 'v1',
+      runners,
+      firstStart: '2026-06-29',
+      blocks: 1,
+      activities: [],
+    });
     expect(result.blocks[0]!.result).toBeNull();
-    expect(result.blocks[0]!.skipped).toBe(
-      'Needs at least two runners with four weeks of history.',
-    );
-    expect(result.totals.find((t) => t.runnerId === 'a')!.blocksPlayed).toBe(0);
+    expect(result.blocks[0]!.skipped).toBe('Needs at least one runner with four weeks of history.');
+    expect(result.totals.every((t) => t.blocksPlayed === 0)).toBe(true);
   });
 
   it('is deterministic', () => {
