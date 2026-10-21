@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { StandingRow } from '@crew/engine';
 import { fixture, result, runnerName, runnersById } from './data';
 import { Kudos } from './client';
@@ -18,21 +18,6 @@ const ORDINALS = ['1st', '2nd', '3rd'];
 export const ordinal = (n: number) => ORDINALS[n - 1] ?? `${n}th`;
 export const pad2 = (n: number) => String(n).padStart(2, '0');
 
-// One vivid gradient per runner, in roster order.
-const GRADIENTS: [string, string][] = [
-  ['#5b3cff', '#a23cff'],
-  ['#ff5f3c', '#ff2f8e'],
-  ['#1f8bff', '#5b3cff'],
-  ['#00b37e', '#00c2d6'],
-  ['#ffae1f', '#ff5f3c'],
-];
-
-export function gradientFor(id: string): CSSProperties {
-  const index = fixture.runners.findIndex((r) => r.id === id);
-  const [g1, g2] = GRADIENTS[Math.max(0, index) % GRADIENTS.length]!;
-  return { ['--g1' as string]: g1, ['--g2' as string]: g2 };
-}
-
 export function Label({ children, className }: { children: ReactNode; className?: string }) {
   return <span className={className ? `label ${className}` : 'label'}>{children}</span>;
 }
@@ -42,7 +27,7 @@ export function Monogram({ id, size = 32 }: { id: string; size?: number }) {
   return (
     <span
       className="avatar"
-      style={{ width: size, height: size, fontSize: size * 0.4, ...gradientFor(id) }}
+      style={{ width: size, height: size, fontSize: size * 0.4 }}
       aria-hidden
     >
       {name.slice(0, 1)}
@@ -67,30 +52,22 @@ export function Bar({ pct, from, label }: { pct: number; from?: number; label?: 
   );
 }
 
-/** A circular gauge, Whoop-style: the arc fills to the percentage and glows when complete. */
-export function Ring({ id, pct, size = 64 }: { id: string; pct: number; size?: number }) {
+/** A circular gauge, Whoop-style: the arc fills to the percentage and turns teal when complete. */
+export function Ring({ pct, size = 64 }: { id?: string; pct: number; size?: number }) {
   const stroke = 6;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const filled = Math.max(0, Math.min(100, pct)) / 100;
-  const gid = `ring-${id}`;
-  const style = gradientFor(id) as Record<string, string>;
   return (
     <span className={pct >= 100 ? 'ring done' : 'ring'} style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-        <defs>
-          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={style['--g1']} />
-            <stop offset="100%" stopColor={style['--g2']} />
-          </linearGradient>
-        </defs>
         <circle cx={size / 2} cy={size / 2} r={r} className="ring-track" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
+          className="ring-arc"
           fill="none"
-          stroke={`url(#${gid})`}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={`${c * filled} ${c}`}
@@ -228,7 +205,7 @@ export function RunFigures({ ctx, size = 'feed' }: { ctx: RunContext; size?: 'fe
   const { run } = ctx;
   const status = RUN_STATUS[run.status]!;
   return (
-    <div className={`figures size-${size}`} style={gradientFor(ctx.runnerId)}>
+    <div className={`figures size-${size}`}>
       <div className="figures-top">
         <span>{formatDay(run.runDate)}</span>
         <span className="figures-tags">
@@ -312,11 +289,7 @@ function CommitItem({ item }: { item: Extract<FeedItem, { kind: 'commit' }> }) {
 function OvertakeItem({ item }: { item: Extract<FeedItem, { kind: 'overtake' }> }) {
   return (
     <article className="item">
-      <Link
-        href={`/demo/run/${item.activityId}`}
-        className="overtake"
-        style={gradientFor(item.runnerId)}
-      >
+      <Link href={`/demo/run/${item.activityId}`} className="overtake">
         <span className="overtake-icon" aria-hidden>
           <svg viewBox="0 0 24 24" width="20" height="20">
             <path
@@ -356,7 +329,7 @@ function WeekItem({ item }: { item: Extract<FeedItem, { kind: 'week' }> }) {
         </div>
         <ol className="podium">
           {top.map((rw, i) => (
-            <li key={rw.runnerId} style={gradientFor(rw.runnerId)}>
+            <li key={rw.runnerId}>
               <span className="podium-place">{ordinal(i + 1)}</span>
               <Monogram id={rw.runnerId} size={40} />
               <strong>{runnerName(rw.runnerId)}</strong>

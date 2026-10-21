@@ -1,20 +1,21 @@
 :root {
-  --bg: #f5f6fa;
+  --bg: #ebecee;
   --card: #fff;
-  --ink: #0e0f1a;
-  --ink-2: #474a5c;
-  --dim: #8b8ea0;
-  --line: #eceef4;
-  --track: #e9ebf2;
-  --brand-1: #5b3cff;
-  --brand-2: #a23cff;
-  --lime: #b8f03a;
-  --lime-ink: #3d7a00;
-  --up: #12a150;
-  --down: #e5484d;
-  --warn: #d9730d;
+  --ink: #16181d;
+  --ink-2: #4a4e58;
+  --dim: #8a8e99;
+  --line: #eceef1;
+  --track: #e3e5e9;
+  --graphite-1: #3b3f48;
+  --graphite-2: #1c1e24;
+  --accent: #14c8a0;
+  --accent-soft: rgba(20, 200, 160, 0.16);
+  --accent-ink: #0b8a6c;
+  --up: #0b8a6c;
+  --down: #c2453f;
+  --warn: #b8690f;
   --radius: 22px;
-  --shadow: 0 1px 2px rgba(20, 22, 60, 0.04), 0 10px 30px rgba(20, 22, 60, 0.06);
+  --shadow: 0 1px 2px rgba(20, 22, 30, 0.04), 0 8px 24px rgba(20, 22, 30, 0.06);
   --sans: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color-scheme: light;
 }
@@ -79,7 +80,7 @@ button {
 }
 
 .label.tick {
-  color: var(--lime-ink);
+  color: var(--accent-ink);
 }
 
 .label.warn {
@@ -120,8 +121,8 @@ button {
 .chip {
   font-size: 12px;
   font-weight: 600;
-  color: var(--brand-1);
-  background: rgba(91, 60, 255, 0.1);
+  color: var(--ink-2);
+  background: var(--track);
   padding: 4px 10px;
   border-radius: 999px;
 }
@@ -235,16 +236,13 @@ button {
 /* Avatars */
 
 .avatar {
-  --g1: var(--brand-1);
-  --g2: var(--brand-2);
   flex: none;
   display: inline-grid;
   place-items: center;
   border-radius: 50%;
-  background: linear-gradient(140deg, var(--g1), var(--g2));
+  background: linear-gradient(140deg, var(--graphite-1), var(--graphite-2));
   color: #fff;
   font-weight: 700;
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--g1) 30%, transparent);
 }
 
 /* Bars */
@@ -265,16 +263,15 @@ button {
 }
 
 .bar-fill {
-  background: linear-gradient(90deg, var(--brand-1), var(--brand-2));
+  background: var(--graphite-2);
 }
 
 .bar-fill.done {
-  background: linear-gradient(90deg, #7ddc1f, var(--lime));
-  box-shadow: 0 0 12px rgba(184, 240, 58, 0.7);
+  background: var(--accent);
 }
 
 .bar-prev {
-  background: #c9cbe0;
+  background: #b9bcc5;
 }
 
 /* Rings */
@@ -311,8 +308,12 @@ button {
   stroke: var(--track);
 }
 
-.ring.done svg {
-  filter: drop-shadow(0 0 6px rgba(124, 90, 255, 0.45));
+.ring-arc {
+  stroke: var(--graphite-2);
+}
+
+.ring.done .ring-arc {
+  stroke: var(--accent);
 }
 
 .ring-value {
@@ -375,18 +376,15 @@ button {
   margin: 0 -10px;
   padding: 12px 10px;
   border-radius: 16px;
-  background: linear-gradient(120deg, rgba(91, 60, 255, 0.1), rgba(162, 60, 255, 0.06));
+  background: var(--bg);
 }
 
 .leader .row-rank {
-  color: var(--brand-1);
+  color: var(--ink);
 }
 
 .leader .row-num {
-  background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--accent-ink);
 }
 
 .leader + li {
@@ -456,7 +454,7 @@ button {
 }
 
 .progress-pct.done {
-  color: var(--lime-ink);
+  color: var(--accent-ink);
 }
 
 /* Feed */
@@ -518,8 +516,6 @@ button {
 /* Gradient run card */
 
 .figures {
-  --g1: var(--brand-1);
-  --g2: var(--brand-2);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -529,9 +525,8 @@ button {
   border-radius: 18px;
   color: #fff;
   background:
-    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.22), transparent 55%),
-    linear-gradient(140deg, var(--g1), var(--g2));
-  box-shadow: 0 12px 28px color-mix(in srgb, var(--g2) 28%, transparent);
+    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
+    linear-gradient(140deg, var(--graphite-1), var(--graphite-2));
 }
 
 .figures-top {
@@ -553,8 +548,7 @@ button {
   font-weight: 700;
   padding: 4px 9px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .figure-main {
@@ -588,7 +582,7 @@ button {
   gap: 8px;
   padding: 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .figure-grid dt {
@@ -631,15 +625,13 @@ button {
 }
 
 .delta.up {
-  background: rgba(184, 240, 58, 0.35);
-  color: var(--lime-ink);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 /* Overtake */
 
 .overtake {
-  --g1: var(--brand-1);
-  --g2: var(--brand-2);
   display: flex;
   align-items: center;
   gap: 14px;
@@ -647,8 +639,8 @@ button {
   border-radius: 18px;
   color: #fff;
   background:
-    radial-gradient(100% 120% at 0% 0%, rgba(255, 255, 255, 0.2), transparent 60%),
-    linear-gradient(120deg, var(--g1), var(--g2));
+    radial-gradient(100% 120% at 0% 0%, rgba(255, 255, 255, 0.1), transparent 60%),
+    linear-gradient(120deg, var(--graphite-1), var(--graphite-2));
 }
 
 .overtake .label {
@@ -662,7 +654,8 @@ button {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--accent);
+  color: var(--graphite-2);
 }
 
 .overtake-line {
@@ -687,8 +680,6 @@ button {
 }
 
 .podium li {
-  --g1: var(--brand-1);
-  --g2: var(--brand-2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -700,8 +691,8 @@ button {
 }
 
 .podium li:first-child {
-  background: linear-gradient(160deg, color-mix(in srgb, var(--g1) 14%, #fff), #fff);
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--g1) 35%, transparent);
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--graphite-2);
 }
 
 .podium-place {
@@ -754,8 +745,7 @@ button {
 
 .kudos-button.active {
   color: #fff;
-  background: linear-gradient(120deg, #ff5f3c, #ff2f8e);
-  box-shadow: 0 6px 16px rgba(255, 47, 142, 0.35);
+  background: var(--graphite-2);
 }
 
 .kudos-by {
@@ -813,21 +803,19 @@ button {
 }
 
 .duel-pts.win {
-  color: #fff;
-  background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+  color: var(--graphite-2);
+  background: var(--accent);
 }
 
 .duel-result {
   margin-top: 6px;
   align-self: flex-start;
-  color: var(--lime-ink);
+  color: var(--accent-ink);
 }
 
 /* Runner */
 
 .profile {
-  --g1: var(--brand-1);
-  --g2: var(--brand-2);
   display: flex;
   align-items: center;
   gap: 14px;
@@ -835,13 +823,12 @@ button {
   border-radius: var(--radius);
   color: #fff;
   background:
-    radial-gradient(120% 100% at 100% 0%, rgba(255, 255, 255, 0.22), transparent 55%),
-    linear-gradient(140deg, var(--g1), var(--g2));
-  box-shadow: 0 14px 32px color-mix(in srgb, var(--g2) 30%, transparent);
+    radial-gradient(120% 100% at 100% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
+    linear-gradient(140deg, var(--graphite-1), var(--graphite-2));
 }
 
 .profile .avatar {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.14);
   box-shadow: none;
 }
 
@@ -942,7 +929,7 @@ button {
 .breakdown-pts {
   font-weight: 800;
   font-size: 16px;
-  color: var(--brand-1);
+  color: var(--ink);
 }
 
 .breakdown-pts.zero {
@@ -1017,8 +1004,7 @@ button {
 }
 
 .col.this .col-fill {
-  background: linear-gradient(180deg, var(--brand-2), var(--brand-1));
-  box-shadow: 0 0 14px rgba(124, 90, 255, 0.5);
+  background: var(--graphite-2);
 }
 
 .col .label {
@@ -1026,7 +1012,7 @@ button {
 }
 
 .col.this .label {
-  color: var(--brand-1);
+  color: var(--ink);
 }
 
 /* Tab bar */
@@ -1065,8 +1051,7 @@ button {
 
 .tabbar-item.active {
   color: #fff;
-  background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
-  box-shadow: 0 6px 16px rgba(91, 60, 255, 0.35);
+  background: var(--graphite-2);
 }
 
 /* Landing */
@@ -1082,20 +1067,16 @@ button {
   font-weight: 800;
   letter-spacing: -0.05em;
   line-height: 1;
-  background: linear-gradient(120deg, var(--ink) 40%, var(--brand-1));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--ink);
 }
 
 .cta {
   align-self: flex-start;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+  background: var(--graphite-2);
   padding: 14px 22px;
   border-radius: 999px;
-  box-shadow: 0 10px 24px rgba(91, 60, 255, 0.35);
 }
 
 @media (max-width: 370px) {

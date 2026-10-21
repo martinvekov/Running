@@ -11,7 +11,7 @@ import {
   RULE_LABELS,
   RUN_STATUS,
 } from '../../_lib/format';
-import { Bar, gradientFor, Label, Monogram, ordinal } from '../../_lib/ui';
+import { Bar, Label, Monogram, ordinal } from '../../_lib/ui';
 
 export function generateStaticParams() {
   return fixture.runners.map((r) => ({ id: r.id }));
@@ -48,7 +48,7 @@ export default async function DemoRunnerPage({ params }: { params: Promise<{ id:
         ← Standings
       </Link>
 
-      <header className="profile" style={gradientFor(id)}>
+      <header className="profile">
         <Monogram id={id} size={64} />
         <div className="profile-main">
           <h1>{runner.name}</h1>
