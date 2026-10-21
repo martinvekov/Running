@@ -18,7 +18,9 @@ export async function middleware(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  // Reads the session and refreshes it when it is about to expire. Checking the signed token
+  // locally is faster than asking Supabase on every request.
+  await supabase.auth.getClaims();
   return response;
 }
 

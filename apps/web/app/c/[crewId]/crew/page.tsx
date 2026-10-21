@@ -5,7 +5,7 @@ import { Avatar } from '@/components/avatar';
 import { CopyButton } from '@/components/copy-button';
 import { NotConnected } from '@/components/not-connected';
 import { londonDate } from '@crew/engine';
-import { getCrewContext } from '@/lib/season-data';
+import { getCrewContext, memberName } from '@/lib/season-data';
 import { upcomingMondays } from '@/lib/season-forms';
 import { formatShortDate } from '@/app/_season/format';
 import { planSeason, saveBaseline, startSeason } from '../actions';
@@ -15,17 +15,6 @@ import { supabaseEnv } from '@/lib/supabase/env';
 
 export const metadata: Metadata = { title: 'Crew · Crew Seasons' };
 export const dynamic = 'force-dynamic';
-
-interface MemberRow {
-  user_id: string;
-  role: 'organiser' | 'member';
-  profiles: { display_name: string } | { display_name: string }[] | null;
-}
-
-function nameOf(member: MemberRow): string {
-  const p = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
-  return p?.display_name ?? 'Runner';
-}
 
 const ERRORS: Record<string, string> = {
   organiser: 'Only the organiser can do that.',
@@ -48,14 +37,14 @@ export default async function CrewPage({
   if (!supabaseEnv()) return <NotConnected />;
   const { crewId } = await params;
   const { error, saved } = await searchParams;
-  const { supabase, user, crew, season, isOrganiser } = await getCrewContext(crewId);
-
-  const { data: members } = await supabase
-    .from('crew_members')
-    .select('user_id, role, profiles(display_name)')
-    .eq('crew_id', crewId)
-    .order('joined_at');
-  const people = (members ?? []) as MemberRow[];
+  const {
+    supabase,
+    user,
+    crew,
+    season,
+    isOrganiser,
+    members: people,
+  } = await getCrewContext(crewId);
 
   const { data: baselines } = season
     ? await supabase
@@ -220,9 +209,9 @@ export default async function CrewPage({
         <ul className="member-list">
           {people.map((m) => (
             <li key={m.user_id}>
-              <Avatar name={nameOf(m)} />
+              <Avatar name={memberName(m)} />
               <span>
-                {nameOf(m)}
+                {memberName(m)}
                 {m.user_id === user.id ? ' (you)' : ''}
               </span>
               {m.role === 'organiser' && <span className="chip">Organiser</span>}
