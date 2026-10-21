@@ -1805,57 +1805,20 @@ button {
   color: var(--dim);
 }
 
-/* Runs outside the season, as compact rows. */
-.past-item {
-  padding: 4px 8px;
-}
-
-.past-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 56px;
-  padding: 6px 4px;
-}
-
-.past-main,
-.past-figures {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.past-main {
-  flex: 1;
-}
-
-.past-who {
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.past-main small,
-.past-figures small {
-  font-size: 12px;
-  color: var(--dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.past-figures {
-  align-items: flex-end;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.past-figures strong {
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
 .feed > .btn-secondary {
   align-self: stretch;
+}
+
+/* A leader highlight never touches the row below it. */
+.leader .row {
+  margin-block: 2px;
+}
+
+.table li + li.leader {
+  margin-top: 4px;
+}
+
+.score-table tbody tr:last-child th,
+.score-table tbody tr:last-child td {
+  padding-bottom: 4px;
 }
