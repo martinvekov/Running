@@ -193,8 +193,12 @@ export default async function LogPage({
                 <input type="checkbox" name="bounty" />
                 <span>
                   This run claims the week&apos;s bounty
-                  <small>
-                    {bounties.map((b) => `Week ${b.weekIndex + 1}: ${b.title}`).join(' · ')}
+                  <small className="check-list">
+                    {bounties.map((b) => (
+                      <span key={b.weekIndex}>
+                        Week {b.weekIndex + 1}: {b.title}
+                      </span>
+                    ))}
                   </small>
                 </span>
               </label>
@@ -203,7 +207,7 @@ export default async function LogPage({
               Log run
             </SubmitButton>
           </form>
-          <p className="caption">
+          <p className="caption caption-after">
             Log a run within two days of running it, or it won’t count. Only one run a day earns
             show-up points.
           </p>

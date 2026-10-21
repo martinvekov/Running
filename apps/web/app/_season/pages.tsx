@@ -28,9 +28,10 @@ import {
   StandingsTable,
   WeekTabs,
 } from './ui';
+import { leadLine } from './lead';
 import type { SeasonView } from './view';
 
-export function FeedScreen({ view }: { view: SeasonView }) {
+export function FeedScreen({ view, earlier }: { view: SeasonView; earlier?: number }) {
   const first = view.result.weeks[0]!;
   const last = view.result.weeks.at(-1)!;
   return (
@@ -44,26 +45,22 @@ export function FeedScreen({ view }: { view: SeasonView }) {
       <StandingsCard view={view} />
       <HowItWorks />
       <CrewProgress view={view} />
-      <Feed view={view} />
+      <Feed view={view} {...(earlier ? { earlier } : {})} />
     </main>
   );
 }
 
 export function StandingsScreen({ view }: { view: SeasonView }) {
-  const { result, runnerName } = view;
-  const [leader, second] = result.standings;
+  const { result } = view;
   const finished = result.weeks.every((w) => w.status === 'closed');
+  const lead = leadLine(view, finished);
   return (
     <main className="page with-tabbar">
       <Masthead
         kicker={view.crewName}
         demo={view.demo}
         title="Standings"
-        meta={
-          leader && second
-            ? `${runnerName(leader.runnerId)} ${finished ? 'wins' : 'leads'} by ${leader.points - second.points} points`
-            : undefined
-        }
+        meta={lead ? `${lead.name ? `${lead.name} ` : ''}${lead.text}` : undefined}
       />
       <WeekTabs view={view} active="season" />
       <StandingsTable view={view} rows={result.standings} title={`Season ${view.seasonNumber}`} />

@@ -27,6 +27,8 @@ function nameOf(member: MemberRow): string {
   return p?.display_name ?? 'Runner';
 }
 
+const BOUNTY_IDEAS = ['A run before 7am', 'Two runs on trails', 'Beat your longest run'];
+
 const ERRORS: Record<string, string> = {
   organiser: 'Only the organiser can do that.',
   'season-open': 'This crew already has a season going.',
@@ -116,7 +118,7 @@ export default async function CrewPage({
               {[0, 1, 2].map((i) => (
                 <label key={i} className="field">
                   <span>Week {i + 1} bounty (optional)</span>
-                  <input name={`bounty${i}`} maxLength={80} placeholder="A run before 7am" />
+                  <input name={`bounty${i}`} maxLength={80} placeholder={BOUNTY_IDEAS[i]} />
                 </label>
               ))}
               <SubmitButton className="btn-primary" pending="Planning…">
@@ -134,17 +136,19 @@ export default async function CrewPage({
               your baseline, and you&apos;re scored against it. It locks when the season starts.
             </p>
             {(bounties ?? []).length > 0 && (
-              <ul className="member-list">
-                {[...(bounties ?? [])]
-                  .sort((a, b) => a.week_index - b.week_index)
-                  .map((b) => (
-                    <li key={b.week_index}>
-                      <span>
-                        Week {b.week_index + 1}: {b.title}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
+              <div className="bounty-box">
+                <span className="label">Bounties</span>
+                <ul className="bounty-list">
+                  {[...(bounties ?? [])]
+                    .sort((a, b) => a.week_index - b.week_index)
+                    .map((b) => (
+                      <li key={b.week_index}>
+                        <span className="bounty-week">Week {b.week_index + 1}</span>
+                        {b.title}
+                      </li>
+                    ))}
+                </ul>
+              </div>
             )}
             <form action={saveBaseline} className="stack">
               <input type="hidden" name="crewId" value={crewId} />

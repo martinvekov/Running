@@ -1517,6 +1517,8 @@ button {
 
 .auth-page h1 {
   font-size: 2.4rem;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
 .stack .btn-primary {
@@ -1719,4 +1721,141 @@ button {
   .skeleton {
     animation: none;
   }
+}
+
+/* QA pass: spacing and mobile-browser fixes. */
+
+/* iOS Safari ignores height and overflows its box unless the native look is switched off. */
+.field input[type='date'],
+.field input[type='time'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 48px;
+  text-align: left;
+}
+
+.field input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.2em;
+}
+
+/* Page text no longer shows through the gap around the floating tab bar. */
+.tabbar-fade {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(96px + env(safe-area-inset-bottom));
+  pointer-events: none;
+  z-index: 19;
+  background: linear-gradient(to top, var(--bg) 0%, var(--bg) 45%, transparent 100%);
+}
+
+.caption-after {
+  margin: 8px 0 0;
+}
+
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.button-row {
+  align-items: center;
+  gap: 10px 20px;
+}
+
+.bounty-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bounty-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bounty-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.bounty-week {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* Runs outside the season, as compact rows. */
+.past-item {
+  padding: 4px 8px;
+}
+
+.past-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 6px 4px;
+}
+
+.past-main,
+.past-figures {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.past-main {
+  flex: 1;
+}
+
+.past-who {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.past-main small,
+.past-figures small {
+  font-size: 12px;
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.past-figures {
+  align-items: flex-end;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.past-figures strong {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.feed > .btn-secondary {
+  align-self: stretch;
 }
