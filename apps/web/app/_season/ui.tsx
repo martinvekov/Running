@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { maxWeeklyPoints, rulesV1, type RuleId, type StandingRow } from '@crew/engine';
-import { fixture, result, runnerName, runnersById } from './data';
+import type { SeasonView } from './view';
 import { Kudos } from './client';
 import type { FeedItem, RunContext } from './feed';
 import {
@@ -23,8 +23,7 @@ export function Label({ children, className }: { children: ReactNode; className?
   return <span className={className ? `label ${className}` : 'label'}>{children}</span>;
 }
 
-export function Monogram({ id, size = 32 }: { id: string; size?: number }) {
-  const name = runnersById.get(id)?.name ?? id;
+export function Monogram({ name, size = 32 }: { name: string; size?: number }) {
   return (
     <span
       className="avatar"
@@ -54,7 +53,7 @@ export function Bar({ pct, from, label }: { pct: number; from?: number; label?: 
 }
 
 /** A circular gauge, Whoop-style: the arc fills to the percentage and turns teal when complete. */
-export function Ring({ pct, size = 64 }: { id?: string; pct: number; size?: number }) {
+export function Ring({ pct, size = 64 }: { pct: number; size?: number }) {
   const stroke = 6;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
@@ -84,16 +83,18 @@ export function Masthead({
   kicker,
   title,
   meta,
+  demo = false,
 }: {
   kicker: string;
   title: string;
   meta?: string | undefined;
+  demo?: boolean;
 }) {
   return (
     <header className="masthead">
       <div className="masthead-top">
         <Label>{kicker}</Label>
-        <span className="chip">Demo</span>
+        {demo && <span className="chip">Demo</span>}
       </div>
       <h1>{title}</h1>
       {meta && <p className="masthead-meta">{meta}</p>}
@@ -101,16 +102,20 @@ export function Masthead({
   );
 }
 
-export function WeekTabs({ active, weeks }: { active: 'season' | number; weeks: number }) {
+export function WeekTabs({ view, active }: { view: SeasonView; active: 'season' | number }) {
+  const weeks = view.result.weeks.length;
   return (
     <nav className="seg" aria-label="Season or week">
-      <Link href="/demo/standings" className={active === 'season' ? 'seg-item active' : 'seg-item'}>
+      <Link
+        href={`${view.base}/standings`}
+        className={active === 'season' ? 'seg-item active' : 'seg-item'}
+      >
         Season
       </Link>
       {Array.from({ length: weeks }, (_, i) => (
         <Link
           key={i}
-          href={`/demo/week/${i + 1}`}
+          href={`${view.base}/week/${i + 1}`}
           className={active === i + 1 ? 'seg-item active' : 'seg-item'}
         >
           Week {i + 1}
@@ -120,8 +125,17 @@ export function WeekTabs({ active, weeks }: { active: 'season' | number; weeks: 
   );
 }
 
-export function StandingsTable({ rows, title }: { rows: StandingRow[]; title?: string }) {
+export function StandingsTable({
+  view,
+  rows,
+  title,
+}: {
+  view: SeasonView;
+  rows: StandingRow[];
+  title?: string;
+}) {
   const top = rows[0]?.points ?? 0;
+  const { runnerName } = view;
   return (
     <section className="section">
       {title && (
@@ -133,9 +147,9 @@ export function StandingsTable({ rows, title }: { rows: StandingRow[]; title?: s
       <ol className="table">
         {rows.map((row) => (
           <li key={row.runnerId} className={row.rank === 1 ? 'leader' : undefined}>
-            <Link href={`/demo/runner/${row.runnerId}`} className="row">
+            <Link href={`${view.base}/runner/${row.runnerId}`} className="row">
               <span className="row-rank">{row.rank}</span>
-              <Monogram id={row.runnerId} size={38} />
+              <Monogram name={view.runnerName(row.runnerId)} size={38} />
               <span className="row-name">
                 {runnerName(row.runnerId)}
                 <small>
@@ -154,8 +168,10 @@ export function StandingsTable({ rows, title }: { rows: StandingRow[]; title?: s
 }
 
 /** The feed's opening card: who is winning, by how much, and how everyone compares. */
-export function StandingsCard() {
+export function StandingsCard({ view }: { view: SeasonView }) {
+  const { result } = view;
   const rows = result.standings;
+  const { runnerName } = view;
   const [leader, second] = rows;
   const finished = result.weeks.every((w) => w.status === 'closed');
   const top = leader?.points ?? 1;
@@ -163,7 +179,7 @@ export function StandingsCard() {
     <section className="section">
       <div className="section-head">
         <Label>{finished ? 'Final standings' : 'Standings'}</Label>
-        <Link href="/demo/standings" className="link-more">
+        <Link href={`${view.base}/standings`} className="link-more">
           Full table
         </Link>
       </div>
@@ -176,9 +192,9 @@ export function StandingsCard() {
       <ol className="table compact">
         {rows.map((row) => (
           <li key={row.runnerId}>
-            <Link href={`/demo/runner/${row.runnerId}`} className="row">
+            <Link href={`${view.base}/runner/${row.runnerId}`} className="row">
               <span className="row-rank">{row.rank}</span>
-              <Monogram id={row.runnerId} size={30} />
+              <Monogram name={view.runnerName(row.runnerId)} size={30} />
               <span className="row-name">
                 <span className="row-name-top">
                   {runnerName(row.runnerId)}
@@ -333,7 +349,8 @@ const RULE_COLUMNS: [RuleId, string][] = [
 ];
 
 /** Season points split by rule, so it is obvious where each score came from. */
-export function PointsByRule() {
+export function PointsByRule({ view }: { view: SeasonView }) {
+  const { result, runnerName } = view;
   const totals = new Map<string, Record<string, number>>();
   for (const week of result.weeks) {
     for (const rw of week.runners) {
@@ -364,7 +381,9 @@ export function PointsByRule() {
             return (
               <tr key={row.runnerId}>
                 <th scope="row">
-                  <Link href={`/demo/runner/${row.runnerId}`}>{runnerName(row.runnerId)}</Link>
+                  <Link href={`${view.base}/runner/${row.runnerId}`}>
+                    {runnerName(row.runnerId)}
+                  </Link>
                 </th>
                 {RULE_COLUMNS.map(([rule]) => (
                   <td key={rule}>{t[rule] ?? 0}</td>
@@ -380,7 +399,8 @@ export function PointsByRule() {
 }
 
 /** This week's commitment progress for the whole crew, as ring gauges. */
-export function CrewProgress() {
+export function CrewProgress({ view }: { view: SeasonView }) {
+  const { result } = view;
   const week = [...result.weeks].reverse().find((w) => w.status !== 'upcoming') ?? result.weeks[0]!;
   return (
     <section className="section">
@@ -392,12 +412,12 @@ export function CrewProgress() {
         Each ring is a runner&apos;s km against their own target. Full ring = word kept.
       </p>
       <ul className="rings">
-        {fixture.runners.map((r) => {
+        {view.runners.map((r) => {
           const rw = week.runners.find((x) => x.runnerId === r.id)!;
           return (
             <li key={r.id}>
-              <Link href={`/demo/runner/${r.id}`} className="ring-cell">
-                <Ring id={r.id} pct={rw.kmPct} size={52} />
+              <Link href={`${view.base}/runner/${r.id}`} className="ring-cell">
+                <Ring pct={rw.kmPct} size={52} />
                 <span>{r.name}</span>
               </Link>
             </li>
@@ -408,24 +428,27 @@ export function CrewProgress() {
   );
 }
 
-function kudosFor(itemId: string, authorId?: string) {
-  const k = demoKudos(itemId, authorId);
-  return { initial: k, names: k.by.map(runnerName) };
+function kudosFor(view: SeasonView, itemId: string, authorId?: string) {
+  const k = demoKudos(view.runners, itemId, authorId);
+  return { initial: k, names: k.by.map(view.runnerName) };
 }
 
 function ItemHead({
+  view,
   runnerId,
   right,
   badge,
 }: {
+  view: SeasonView;
   runnerId: string;
   right: string;
   badge?: ReactNode;
 }) {
+  const { runnerName } = view;
   return (
     <div className="item-head">
-      <Monogram id={runnerId} size={32} />
-      <Link href={`/demo/runner/${runnerId}`} className="item-who">
+      <Monogram name={view.runnerName(runnerId)} size={32} />
+      <Link href={`${view.base}/runner/${runnerId}`} className="item-who">
         {runnerName(runnerId)}
         <small>{right}</small>
       </Link>
@@ -489,17 +512,18 @@ export function RunFigures({ ctx, size = 'feed' }: { ctx: RunContext; size?: 'fe
   );
 }
 
-function RunItem({ item }: { item: Extract<FeedItem, { kind: 'run' }> }) {
+function RunItem({ view, item }: { view: SeasonView; item: Extract<FeedItem, { kind: 'run' }> }) {
   const { ctx } = item;
   const counts = ctx.run.status === 'counted' || ctx.run.status === 'km-only';
   return (
     <article className="item">
       <ItemHead
+        view={view}
         runnerId={ctx.runnerId}
         right={`${formatDay(ctx.run.runDate)} · Week ${ctx.weekIndex + 1}`}
         badge={<PointsBadge ctx={ctx} />}
       />
-      <Link href={`/demo/run/${ctx.run.activityId}`} className="item-body">
+      <Link href={`${view.base}/run/${ctx.run.activityId}`} className="item-body">
         <RunFigures ctx={ctx} />
       </Link>
       {counts && (
@@ -514,17 +538,27 @@ function RunItem({ item }: { item: Extract<FeedItem, { kind: 'run' }> }) {
           <Bar pct={ctx.pctAfter} from={ctx.pctBefore} />
         </div>
       )}
-      <Kudos {...kudosFor(item.id, ctx.runnerId)} />
+      {view.demo && <Kudos {...kudosFor(view, item.id, ctx.runnerId)} />}
     </article>
   );
 }
 
-function CommitItem({ item }: { item: Extract<FeedItem, { kind: 'commit' }> }) {
-  const runner = runnersById.get(item.runnerId)!;
+function CommitItem({
+  view,
+  item,
+}: {
+  view: SeasonView;
+  item: Extract<FeedItem, { kind: 'commit' }>;
+}) {
+  const runner = view.runnersById.get(item.runnerId)!;
   const above = Math.round((item.km / runner.baselineKm - 1) * 100);
   return (
     <article className="item">
-      <ItemHead runnerId={item.runnerId} right={`Committed · ${formatDay(item.at.slice(0, 10))}`} />
+      <ItemHead
+        view={view}
+        runnerId={item.runnerId}
+        right={`Committed · ${formatDay(item.at.slice(0, 10))}`}
+      />
       <div className="commit">
         <div>
           <Label className="dim">Week {item.weekIndex + 1}</Label>
@@ -538,15 +572,22 @@ function CommitItem({ item }: { item: Extract<FeedItem, { kind: 'commit' }> }) {
           </span>
         )}
       </div>
-      <Kudos {...kudosFor(item.id, item.runnerId)} />
+      {view.demo && <Kudos {...kudosFor(view, item.id, item.runnerId)} />}
     </article>
   );
 }
 
-function OvertakeItem({ item }: { item: Extract<FeedItem, { kind: 'overtake' }> }) {
+function OvertakeItem({
+  view,
+  item,
+}: {
+  view: SeasonView;
+  item: Extract<FeedItem, { kind: 'overtake' }>;
+}) {
+  const { runnerName } = view;
   return (
     <article className="item">
-      <Link href={`/demo/run/${item.activityId}`} className="overtake">
+      <Link href={`${view.base}/run/${item.activityId}`} className="overtake">
         <span className="overtake-icon" aria-hidden>
           <svg viewBox="0 0 24 24" width="20" height="20">
             <path
@@ -567,17 +608,18 @@ function OvertakeItem({ item }: { item: Extract<FeedItem, { kind: 'overtake' }> 
           <p className="overtake-sub">Passing {item.passed.map(runnerName).join(' and ')}</p>
         </div>
       </Link>
-      <Kudos {...kudosFor(item.id)} />
+      {view.demo && <Kudos {...kudosFor(view, item.id)} />}
     </article>
   );
 }
 
-function WeekItem({ item }: { item: Extract<FeedItem, { kind: 'week' }> }) {
-  const week = result.weeks[item.weekIndex]!;
+function WeekItem({ view, item }: { view: SeasonView; item: Extract<FeedItem, { kind: 'week' }> }) {
+  const { runnerName } = view;
+  const week = view.result.weeks[item.weekIndex]!;
   const top = [...week.runners].sort((a, b) => b.points - a.points).slice(0, 3);
   return (
     <article className="item">
-      <Link href={`/demo/week/${item.weekIndex + 1}`} className="item-body">
+      <Link href={`${view.base}/week/${item.weekIndex + 1}`} className="item-body">
         <div className="spread">
           <strong className="item-title">Week {item.weekIndex + 1} results</strong>
           <span className="small muted">
@@ -588,7 +630,7 @@ function WeekItem({ item }: { item: Extract<FeedItem, { kind: 'week' }> }) {
           {top.map((rw, i) => (
             <li key={rw.runnerId}>
               <span className="podium-place">{ordinal(i + 1)}</span>
-              <Monogram id={rw.runnerId} size={40} />
+              <Monogram name={view.runnerName(rw.runnerId)} size={40} />
               <strong>{runnerName(rw.runnerId)}</strong>
               <span className="podium-pts">{rw.points}</span>
             </li>
@@ -605,24 +647,24 @@ function WeekItem({ item }: { item: Extract<FeedItem, { kind: 'week' }> }) {
           ))}
         </ul>
       </Link>
-      <Kudos {...kudosFor(item.id)} />
+      {view.demo && <Kudos {...kudosFor(view, item.id)} />}
     </article>
   );
 }
 
-export function Feed({ items }: { items: FeedItem[] }) {
+export function Feed({ view }: { view: SeasonView }) {
   return (
     <div className="feed">
-      {items.map((item) => {
+      {view.feed.map((item) => {
         switch (item.kind) {
           case 'run':
-            return <RunItem key={item.id} item={item} />;
+            return <RunItem key={item.id} view={view} item={item} />;
           case 'commit':
-            return <CommitItem key={item.id} item={item} />;
+            return <CommitItem key={item.id} view={view} item={item} />;
           case 'overtake':
-            return <OvertakeItem key={item.id} item={item} />;
+            return <OvertakeItem key={item.id} view={view} item={item} />;
           case 'week':
-            return <WeekItem key={item.id} item={item} />;
+            return <WeekItem key={item.id} view={view} item={item} />;
         }
       })}
     </div>

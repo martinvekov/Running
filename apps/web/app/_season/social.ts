@@ -1,4 +1,4 @@
-import { fixture } from './data';
+import type { Runner } from '@crew/engine';
 import type { DemoKudos } from './reactions';
 
 // Demo-only kudos, generated deterministically so every build shows the same feed.
@@ -10,9 +10,9 @@ function hash(text: string): number {
   return h >>> 0;
 }
 
-export function demoKudos(itemId: string, authorId?: string): DemoKudos {
+export function demoKudos(runners: Runner[], itemId: string, authorId?: string): DemoKudos {
   const h = hash(itemId);
-  const mates = fixture.runners.filter((r) => r.id !== authorId).map((r) => r.id);
+  const mates = runners.filter((r) => r.id !== authorId).map((r) => r.id);
   const count = h % (mates.length + 1);
   const by = Array.from({ length: count }, (_, i) => mates[(h + i) % mates.length]!);
   return { count, by };
