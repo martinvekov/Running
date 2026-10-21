@@ -9,14 +9,16 @@
   --track: #e4dacb;
   --graphite-1: #3a2a20;
   --graphite-2: #1d130e;
-  --accent: #cb4818;
+  --accent: #b8441b;
   --accent-soft: rgba(203, 72, 24, 0.13);
-  --accent-ink: #b53d13;
-  --up: #b53d13;
+  --accent-ink: #a83a14;
+  --up: #a83a14;
   --down: #a8321f;
   --warn: #a8641a;
   --cream: #faeee4;
-  --ember: linear-gradient(135deg, #e8662c 0%, #cb4818 48%, #9c3114 100%);
+  --ember: linear-gradient(135deg, #cc5a2c 0%, #b04420 50%, #7e2e18 100%);
+  /* Film grain: neutral grey noise blended over a colour with `overlay`, so it lightens and darkens it. */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 1'/><feComponentTransfer><feFuncR type='linear' slope='1.5' intercept='-0.25'/><feFuncG type='linear' slope='1.5' intercept='-0.25'/><feFuncB type='linear' slope='1.5' intercept='-0.25'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   --radius: 18px;
   --shadow: 0 1px 2px rgba(60, 30, 10, 0.05), 0 4px 14px rgba(60, 30, 10, 0.04);
   --sans: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -1894,10 +1896,10 @@ button {
   gap: 18px;
   padding: 18px 18px 16px;
   border-radius: 14px;
-  background: var(--g-glow), var(--g-shade), var(--g-base);
-  box-shadow:
-    0 10px 24px -12px var(--g-drop),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  background: var(--grain), var(--g-glow), var(--g-shade), var(--g-base);
+  background-blend-mode: overlay, normal, normal, normal;
+  background-size: 180px, auto, auto, auto;
+  box-shadow: 0 10px 22px -14px var(--g-drop);
 }
 
 .figures > * {
@@ -1914,58 +1916,46 @@ button {
   right: -26px;
   width: 170px;
   height: 140px;
-  opacity: 0.12;
+  opacity: 0.09;
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 160'><g fill='%23faeee4'><polygon points='34,6 154,6 140,28 20,28'/><polygon points='62,38 182,38 168,60 48,60'/><polygon points='34,70 154,70 140,92 20,92'/><polygon points='62,102 182,102 168,124 48,124'/><polygon points='34,134 154,134 140,156 20,156'/></g></svg>")
     no-repeat center / contain;
   pointer-events: none;
 }
 
-/* Fine grain keeps the gradient from looking digital. */
-.figures::before {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  opacity: 0.14;
-  mix-blend-mode: overlay;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  pointer-events: none;
-}
-
 /* One gradient per person, all from the same warm family. */
 .tone-0 {
-  --g-base: linear-gradient(150deg, #e8662c 0%, #cb4818 46%, #8e2b13 100%);
-  --g-glow: radial-gradient(90% 70% at 88% 0%, rgba(255, 190, 120, 0.55), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(70, 12, 8, 0.55), transparent 62%);
-  --g-drop: rgba(203, 72, 24, 0.55);
+  --g-base: linear-gradient(150deg, #c4572b 0%, #a43e1b 50%, #6b2813 100%);
+  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(235, 160, 110, 0.26), transparent 62%);
+  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(30, 8, 5, 0.5), transparent 64%);
+  --g-drop: rgba(120, 40, 15, 0.6);
 }
 
 .tone-1 {
-  --g-base: linear-gradient(150deg, #f4a23c 0%, #e0642a 48%, #a63716 100%);
-  --g-glow: radial-gradient(90% 70% at 88% 0%, rgba(255, 224, 140, 0.6), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(120, 30, 10, 0.5), transparent 62%);
-  --g-drop: rgba(224, 100, 42, 0.5);
+  --g-base: linear-gradient(150deg, #cc8638 0%, #b4562a 50%, #772f17 100%);
+  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(240, 200, 130, 0.28), transparent 62%);
+  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(40, 12, 5, 0.5), transparent 64%);
+  --g-drop: rgba(150, 80, 30, 0.55);
 }
 
 .tone-2 {
-  --g-base: linear-gradient(150deg, #c9441a 0%, #8f2b13 52%, #4a160f 100%);
-  --g-glow: radial-gradient(90% 70% at 88% 0%, rgba(255, 150, 100, 0.45), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(25, 5, 5, 0.6), transparent 62%);
-  --g-drop: rgba(143, 43, 19, 0.55);
+  --g-base: linear-gradient(150deg, #a8411c 0%, #772a19 52%, #3b150f 100%);
+  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(225, 140, 100, 0.22), transparent 62%);
+  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(15, 4, 4, 0.55), transparent 64%);
+  --g-drop: rgba(90, 30, 15, 0.6);
 }
 
 .tone-3 {
-  --g-base: linear-gradient(150deg, #e86a3a 0%, #b83a3a 48%, #5a1f3e 100%);
-  --g-glow: radial-gradient(90% 70% at 88% 0%, rgba(255, 170, 130, 0.5), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(40, 8, 30, 0.55), transparent 62%);
-  --g-drop: rgba(184, 58, 58, 0.5);
+  --g-base: linear-gradient(150deg, #bb5b3d 0%, #8e3a3a 50%, #4b2038 100%);
+  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(235, 160, 130, 0.24), transparent 62%);
+  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(30, 6, 22, 0.5), transparent 64%);
+  --g-drop: rgba(110, 40, 50, 0.55);
 }
 
 .tone-4 {
-  --g-base: linear-gradient(150deg, #d9803a 0%, #a8481f 50%, #482614 100%);
-  --g-glow: radial-gradient(90% 70% at 88% 0%, rgba(255, 205, 140, 0.5), transparent 62%);
-  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(40, 14, 6, 0.55), transparent 62%);
-  --g-drop: rgba(168, 72, 31, 0.5);
+  --g-base: linear-gradient(150deg, #b6793f 0%, #874926 52%, #3d2415 100%);
+  --g-glow: radial-gradient(90% 70% at 90% 0%, rgba(230, 195, 140, 0.24), transparent 62%);
+  --g-shade: radial-gradient(80% 90% at 0% 100%, rgba(30, 10, 4, 0.5), transparent 64%);
+  --g-drop: rgba(100, 55, 25, 0.55);
 }
 
 /* Avatars share their person's gradient. */
@@ -1974,8 +1964,10 @@ button {
 .avatar.tone-2,
 .avatar.tone-3,
 .avatar.tone-4 {
-  background: var(--g-glow), var(--g-base);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  background: var(--grain), var(--g-glow), var(--g-base);
+  background-blend-mode: overlay, normal, normal;
+  background-size: 120px, auto, auto;
+  box-shadow: none;
 }
 
 .figures-top {
@@ -2084,7 +2076,9 @@ button {
 
 .overtake {
   border-radius: 14px;
-  background: var(--g-glow), var(--g-shade), var(--g-base);
+  background: var(--grain), var(--g-glow), var(--g-shade), var(--g-base);
+  background-blend-mode: overlay, normal, normal, normal;
+  background-size: 180px, auto, auto, auto;
 }
 
 .commit {
@@ -2247,15 +2241,17 @@ button {
 
 /* Brand colour on the controls. */
 .btn-primary {
-  background: var(--ember);
-  box-shadow:
-    0 8px 18px -10px rgba(203, 72, 24, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  background: var(--grain), var(--ember);
+  background-blend-mode: overlay, normal;
+  background-size: 140px, auto;
+  box-shadow: 0 8px 18px -12px rgba(126, 46, 24, 0.75);
 }
 
 .tabbar-item.active {
-  background: var(--ember);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: var(--grain), var(--ember);
+  background-blend-mode: overlay, normal;
+  background-size: 120px, auto;
+  box-shadow: none;
 }
 
 .tabbar {
