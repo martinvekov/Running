@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Activity, Bounty, Commitment, Runner, SeasonInput } from '@crew/engine';
 import { buildSeasonView, type SeasonView } from '@/app/_season/view';
 import { requireUser } from './auth';
+import { adminClient, syncStrava } from './strava-sync';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -67,6 +68,7 @@ export const getCrewContext = cache(async (crewId: string) => {
 export const getSeasonView = cache(async (crewId: string): Promise<SeasonView | null> => {
   const { supabase, crew, season } = await getCrewContext(crewId);
   if (!season || season.status === 'setup') return null;
+  if (season.status === 'active') await syncSeasonStrava(season);
   const { data } = await supabase.rpc('season_snapshot', { p_season: season.id });
   const input = snapshotToInput(data as Snapshot, new Date().toISOString());
   if (!input) return null;
@@ -76,3 +78,21 @@ export const getSeasonView = cache(async (crewId: string): Promise<SeasonView | 
     seasonNumber: season.number,
   });
 });
+
+/** Pull in any new Strava runs for the people in this season, at most every ten minutes each. */
+async function syncSeasonStrava(season: SeasonRow) {
+  const admin = adminClient();
+  if (!admin) return;
+  try {
+    const { data } = await admin
+      .from('season_members')
+      .select('user_id')
+      .eq('season_id', season.id);
+    await syncStrava(
+      (data ?? []).map((m) => m.user_id as string),
+      season.start_date,
+    );
+  } catch {
+    // The feed still renders from what is already saved.
+  }
+}

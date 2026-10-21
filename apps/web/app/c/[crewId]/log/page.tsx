@@ -6,7 +6,8 @@ import { Label } from '@/app/_season/ui';
 import { NotConnected } from '@/components/not-connected';
 import { getCrewContext, getSeasonView } from '@/lib/season-data';
 import { supabaseEnv } from '@/lib/supabase/env';
-import { deleteRun, logRun, setCommitment } from '../actions';
+import { stravaAvailable } from '@/lib/strava-sync';
+import { deleteRun, disconnectStrava, logRun, setCommitment, syncStravaNow } from '../actions';
 
 export const metadata: Metadata = { title: 'Log a run · Crew Seasons' };
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,8 @@ const MESSAGES: Record<string, string> = {
   'not-member': 'You joined after the season was set up, so you’re watching this one.',
   deadline: 'That week’s deadline has passed.',
   commit: 'That’s outside the range for your usual week. Check the numbers below.',
+  strava: 'Couldn’t connect to Strava. Please try again.',
+  'strava-denied': 'Strava wasn’t connected. Tap Connect Strava and choose Authorize.',
   save: 'Something went wrong saving that. Please try again.',
 };
 
@@ -29,6 +32,9 @@ const SAVED: Record<string, string> = {
   run: 'Run logged.',
   deleted: 'Run deleted.',
   commitment: 'Commitment saved.',
+  strava: 'Strava connected. Your runs are on their way in.',
+  'strava-sync': 'Checked Strava for new runs.',
+  'strava-off': 'Strava disconnected. Runs already imported stay.',
 };
 
 export default async function LogPage({
@@ -55,6 +61,15 @@ export default async function LogPage({
   const last = weeks.at(-1)!.endDate;
   const bounties = view.input.bounties;
 
+  const { data: strava } = await supabase
+    .from('strava_connections')
+    .select('connected_at, last_synced_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  const syncedMinutes = strava?.last_synced_at
+    ? Math.max(0, Math.round((Date.now() - Date.parse(strava.last_synced_at as string)) / 60_000))
+    : null;
+
   const { data: mine } = await supabase
     .from('activities')
     .select('id, run_date, distance_m, duration_s, source')
@@ -78,6 +93,51 @@ export default async function LogPage({
 
       {error && <p className="error-note">{MESSAGES[error] ?? MESSAGES.save}</p>}
       {saved && <p className="note">{SAVED[saved] ?? 'Saved.'}</p>}
+
+      {me && stravaAvailable() && (
+        <section className="section">
+          <div className="section-head">
+            <Label>Strava</Label>
+            <Label className="dim">{strava ? 'Connected' : 'Automatic runs'}</Label>
+          </div>
+          {strava ? (
+            <div className="stack">
+              <p className="note">
+                Your Strava runs arrive on their own.{' '}
+                {syncedMinutes === null
+                  ? 'Waiting for the first sync.'
+                  : syncedMinutes < 1
+                    ? 'Checked just now.'
+                    : `Last checked ${syncedMinutes} min ago.`}
+              </p>
+              <div className="button-row">
+                <form action={syncStravaNow}>
+                  <input type="hidden" name="crewId" value={crewId} />
+                  <button type="submit" className="btn-secondary">
+                    Check for new runs
+                  </button>
+                </form>
+                <form action={disconnectStrava}>
+                  <input type="hidden" name="crewId" value={crewId} />
+                  <button type="submit" className="link-quiet">
+                    Disconnect
+                  </button>
+                </form>
+              </div>
+            </div>
+          ) : (
+            <div className="stack">
+              <p className="note">
+                Connect once and every run you record on Strava is added for you. We read the date,
+                distance and time, and nothing else.
+              </p>
+              <a className="btn-primary" href={`/api/strava/connect?crew=${crewId}`}>
+                Connect Strava
+              </a>
+            </div>
+          )}
+        </section>
+      )}
 
       {me ? (
         <section className="section">
