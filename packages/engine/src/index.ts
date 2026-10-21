@@ -3,7 +3,7 @@
 export { scoreSeason } from './score';
 export { commitmentBands, validateCommitment, type CommitmentBands } from './commitment';
 export { duelGroups } from './pairings';
-export { getRules, RULES_VERSIONS, rulesV1, type Rules } from './rules';
+export { getRules, maxWeeklyPoints, RULES_VERSIONS, rulesV1, type Rules } from './rules';
 export { addDays, londonDate, londonInstant } from './time';
 export type * from './types';
 

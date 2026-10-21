@@ -1293,3 +1293,63 @@ button {
 .duel .caption {
   margin: 6px 0 0;
 }
+
+.how-intro {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin-bottom: 14px;
+}
+
+.how-points {
+  margin-top: 14px;
+}
+
+.how-points li:first-child {
+  border-top: 0;
+}
+
+.how-points .breakdown-pts {
+  white-space: nowrap;
+  font-size: 15px;
+}
+
+.how-example {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.how-example p {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin: 6px 0 10px;
+}
+
+.how-example dl > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-top: 1px solid var(--track);
+  font-size: 14px;
+}
+
+.how-example dt {
+  color: var(--ink-2);
+}
+
+.how-example dd {
+  font-weight: 700;
+}
+
+.how-example-total dt {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.how-example-total dd {
+  font-size: 16px;
+  font-weight: 800;
+}

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { rulesV1, type RuleId, type StandingRow } from '@crew/engine';
+import { maxWeeklyPoints, rulesV1, type RuleId, type StandingRow } from '@crew/engine';
 import { fixture, result, runnerName, runnersById } from './data';
 import { Kudos } from './client';
 import type { FeedItem, RunContext } from './feed';
@@ -12,6 +12,7 @@ import {
   formatShortDate,
   RUN_STATUS,
 } from './format';
+import { EXAMPLE, exampleWeek } from './example';
 import { demoKudos } from './social';
 
 const ORDINALS = ['1st', '2nd', '3rd'];
@@ -194,52 +195,134 @@ export function StandingsCard() {
   );
 }
 
-const MAX_WEEK =
-  rulesV1.showUp.pointsPerRun * rulesV1.showUp.maxRuns +
-  rulesV1.keepWord[0]!.points +
-  rulesV1.ambition.maxPoints +
-  rulesV1.duel.win +
-  rulesV1.bounty.points;
-
-/** Three steps, in plain words, with the real numbers from the rules. */
+/** The whole game in plain words, with the real numbers from rules v1 and a worked example. */
 export function HowItWorks({ open = false }: { open?: boolean }) {
   const r = rulesV1;
+  const max = maxWeeklyPoints(r);
+  const [tier, near] = r.keepWord;
+  const exampleLines = exampleWeek.lines.filter((l) => l.rule !== 'duel' && l.rule !== 'bounty');
   return (
     <details className="section how" open={open}>
       <summary className="how-summary">
         <span>
-          <Label>How a week works</Label>
-          <span className="how-short">Commit · Run · Score, up to {MAX_WEEK} points</span>
+          <Label>How it works</Label>
+          <span className="how-short">Set your week, run it, earn up to {max} points</span>
         </span>
         <span className="how-chevron" aria-hidden />
       </summary>
+
+      <p className="how-intro">
+        Everyone is scored against their own normal week, so a beginner and a marathoner can both
+        win. The aim is to do what you said you would.
+      </p>
+
       <ol className="how-steps">
         <li>
           <span className="how-n">1</span>
           <p>
-            <strong>Commit.</strong> By Sunday 23:59, say how many runs and km you&apos;ll do next
-            week, within {r.commitmentBand.minKmPct}–{r.commitmentBand.maxKmPct}% of your usual.
+            <strong>Set your week.</strong> By Sunday 23:59, tell the crew how many runs and km
+            you&apos;ll do next week. Stay between {r.commitmentBand.minKmPct}% and{' '}
+            {r.commitmentBand.maxKmPct}% of your usual km. Miss the deadline and last week&apos;s
+            plan carries over.
           </p>
         </li>
         <li>
           <span className="how-n">2</span>
           <p>
-            <strong>Run.</strong> Runs sync from Strava. Pace never counts, and neither does running
-            more than you committed.
+            <strong>Run.</strong> Your runs arrive from Strava on their own, or log one by hand.
+            Pace doesn&apos;t matter, and running more than you promised earns nothing extra.
           </p>
         </li>
         <li>
           <span className="how-n">3</span>
           <p>
-            <strong>Score.</strong> {r.showUp.pointsPerRun} per run (up to {r.showUp.maxRuns}),{' '}
-            {r.keepWord[0]!.points} for keeping your word, up to {r.ambition.maxPoints} for
-            ambition, {r.duel.win} for winning your duel, {r.bounty.points} for the bounty.
+            <strong>Earn points.</strong> You can score up to {max} a week, five ways:
           </p>
         </li>
       </ol>
+
+      <ul className="breakdown how-points">
+        <li>
+          <div>
+            <span className="breakdown-rule">Show up</span>
+            <p>
+              Any run of {r.qualifyingRun.minDurationS / 60}+ minutes or{' '}
+              {r.qualifyingRun.minDistanceM / 1000}+ km. One run a day counts, up to{' '}
+              {r.showUp.maxRuns} a week.
+            </p>
+          </div>
+          <span className="breakdown-pts">+{r.showUp.pointsPerRun} each</span>
+        </li>
+        <li>
+          <div>
+            <span className="breakdown-rule">Keep your word</span>
+            <p>
+              Do every run you promised and at least {tier?.minKmPct}% of your km. A close miss (one
+              run short, {near?.minKmPct}%+ of your km) still earns {near?.points}.
+            </p>
+          </div>
+          <span className="breakdown-pts">+{tier?.points}</span>
+        </li>
+        <li>
+          <div>
+            <span className="breakdown-rule">Ambition</span>
+            <p>
+              A bonus for promising more than usual: +{r.ambition.pointsPerStep} for every{' '}
+              {r.ambition.stepPct}% above your normal km, if you keep your word.
+            </p>
+          </div>
+          <span className="breakdown-pts">up to +{r.ambition.maxPoints}</span>
+        </li>
+        <li>
+          <div>
+            <span className="breakdown-rule">Duel</span>
+            <p>
+              Each week you&apos;re matched with a crew mate. The first to finish their own
+              commitment wins. A draw is worth {r.duel.draw}.
+            </p>
+          </div>
+          <span className="breakdown-pts">+{r.duel.win}</span>
+        </li>
+        <li>
+          <div>
+            <span className="breakdown-rule">Bounty</span>
+            <p>Claim the week&apos;s challenge on a run, like a run before 7am.</p>
+          </div>
+          <span className="breakdown-pts">+{r.bounty.points}</span>
+        </li>
+      </ul>
+
+      <div className="how-example">
+        <Label>Example</Label>
+        <p>
+          {EXAMPLE.name} usually runs {EXAMPLE.usual.runs} times, {EXAMPLE.usual.km} km. She commits
+          to {EXAMPLE.committed.runs} runs, {EXAMPLE.committed.km} km, then does {EXAMPLE.did.runs}{' '}
+          runs, {EXAMPLE.did.km} km.
+        </p>
+        <dl>
+          {exampleLines.map((line) => (
+            <div key={line.rule}>
+              <dt>{RULE_NAMES[line.rule]}</dt>
+              <dd>+{line.points}</dd>
+            </div>
+          ))}
+          <div className="how-example-total">
+            <dt>Before her duel and the bounty</dt>
+            <dd>{exampleLines.reduce((sum, l) => sum + l.points, 0)}</dd>
+          </div>
+        </dl>
+      </div>
     </details>
   );
 }
+
+const RULE_NAMES: Record<RuleId, string> = {
+  'show-up': 'Show up',
+  'keep-word': 'Keep your word',
+  ambition: 'Ambition',
+  duel: 'Duel',
+  bounty: 'Bounty',
+};
 
 const RULE_COLUMNS: [RuleId, string][] = [
   ['show-up', 'Runs'],
@@ -351,10 +434,9 @@ function ItemHead({
   );
 }
 
-/** Points this run earned on its own: show-up points, up to the weekly cap. */
+/** Points this run earned on its own (show-up points), as scored by the engine. */
 export function runPoints(ctx: RunContext): number {
-  const { showUp } = rulesV1;
-  return ctx.runNumber !== undefined && ctx.runNumber <= showUp.maxRuns ? showUp.pointsPerRun : 0;
+  return ctx.showUpPoints;
 }
 
 function PointsBadge({ ctx }: { ctx: RunContext }) {

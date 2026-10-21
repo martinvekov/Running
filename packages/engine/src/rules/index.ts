@@ -13,3 +13,14 @@ export function getRules(version: string): Rules {
   if (!rules) throw new Error(`Unknown rules version: ${version}`);
   return rules;
 }
+
+/** The most a runner can score in one week under these rules. */
+export function maxWeeklyPoints(rules: Rules): number {
+  return (
+    rules.showUp.pointsPerRun * rules.showUp.maxRuns +
+    (rules.keepWord[0]?.points ?? 0) +
+    rules.ambition.maxPoints +
+    rules.duel.win +
+    rules.bounty.points
+  );
+}

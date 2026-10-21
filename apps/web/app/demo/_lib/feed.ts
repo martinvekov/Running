@@ -2,6 +2,7 @@ import {
   scoreSeason,
   type EffectiveCommitment,
   type RunView,
+  type SeasonResult,
   type StandingRow,
 } from '@crew/engine';
 import { fixture, result } from './data';
@@ -22,6 +23,8 @@ export interface RunContext {
   completedCommitment: boolean;
   /** Which counted run of the week this was (1-based), if it counted as a run. */
   runNumber?: number;
+  /** Show-up points this run added, from the engine (0 once the weekly cap is reached). */
+  showUpPoints: number;
 }
 
 export type FeedItem =
@@ -48,6 +51,35 @@ export type FeedItem =
 
 const activityById = new Map(fixture.activities.map((a) => [a.id, a]));
 
+const snapshots = new Map<number, SeasonResult>();
+
+/** The season as the engine scored it at a given moment. */
+function resultAt(asOfMs: number): SeasonResult {
+  let snap = snapshots.get(asOfMs);
+  if (!snap) {
+    snap = scoreSeason({ ...fixture, asOf: new Date(asOfMs).toISOString() });
+    snapshots.set(asOfMs, snap);
+  }
+  return snap;
+}
+
+function standingsAt(asOfMs: number): StandingRow[] {
+  return resultAt(asOfMs).standings;
+}
+
+function showUpFor(snap: SeasonResult, weekIndex: number, runnerId: string): number {
+  const rw = snap.weeks[weekIndex]?.runners.find((r) => r.runnerId === runnerId);
+  return rw?.lines.find((l) => l.rule === 'show-up')?.points ?? 0;
+}
+
+/** Show-up points a run added: the engine's show-up total just after it, minus just before. */
+function showUpAdded(loggedAt: string, weekIndex: number, runnerId: string): number {
+  const at = Date.parse(loggedAt);
+  return (
+    showUpFor(resultAt(at), weekIndex, runnerId) - showUpFor(resultAt(at - 1), weekIndex, runnerId)
+  );
+}
+
 function buildRunContexts(): Map<string, RunContext> {
   const out = new Map<string, RunContext>();
   for (const week of result.weeks) {
@@ -60,11 +92,13 @@ function buildRunContexts(): Map<string, RunContext> {
         if (qualifies) km += run.distanceM / 1000;
         if (run.status === 'counted') counted += 1;
         const after = (km / rw.commitment.km) * 100;
+        const loggedAt = activityById.get(run.activityId)!.loggedAt;
         out.set(run.activityId, {
           run,
           runnerId: rw.runnerId,
           weekIndex: week.weekIndex,
-          loggedAt: activityById.get(run.activityId)!.loggedAt,
+          loggedAt,
+          showUpPoints: showUpAdded(loggedAt, week.weekIndex, rw.runnerId),
           commitment: rw.commitment,
           pctBefore: before,
           pctAfter: after,
@@ -78,10 +112,6 @@ function buildRunContexts(): Map<string, RunContext> {
 }
 
 export const runContexts = buildRunContexts();
-
-function standingsAt(asOfMs: number): StandingRow[] {
-  return scoreSeason({ ...fixture, asOf: new Date(asOfMs).toISOString() }).standings;
-}
 
 function buildFeed(): FeedItem[] {
   const items: FeedItem[] = [];
