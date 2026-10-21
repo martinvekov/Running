@@ -1,0 +1,35 @@
+{
+  "name": "crew-seasons",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @crew/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "sim": "pnpm --filter @crew/engine sim"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
+    "@types/node": "^22.20.5",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "15.5.28",
+    "prettier": "^3.9.10",
+    "supabase": "^2.121.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "supabase",
+      "unrs-resolver"
+    ]
+  }
+}
