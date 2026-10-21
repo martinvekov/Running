@@ -4,7 +4,7 @@ import '@fontsource/inter-tight/400.css';
 import '@fontsource/inter-tight/500.css';
 import '@fontsource/inter-tight/600.css';
 import '@fontsource/inter-tight/700.css';
-import '@fontsource/jetbrains-mono/500.css';
+import '@fontsource/inter-tight/800.css';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#ffffff',
+  themeColor: '#f5f6fa',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

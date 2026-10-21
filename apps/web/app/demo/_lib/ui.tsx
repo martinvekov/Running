@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { StandingRow } from '@crew/engine';
 import { fixture, result, runnerName, runnersById } from './data';
 import { Kudos } from './client';
@@ -18,7 +18,21 @@ const ORDINALS = ['1st', '2nd', '3rd'];
 export const ordinal = (n: number) => ORDINALS[n - 1] ?? `${n}th`;
 export const pad2 = (n: number) => String(n).padStart(2, '0');
 
-/** Small monospaced caps: the labelling voice of the whole app. */
+// One vivid gradient per runner, in roster order.
+const GRADIENTS: [string, string][] = [
+  ['#5b3cff', '#a23cff'],
+  ['#ff5f3c', '#ff2f8e'],
+  ['#1f8bff', '#5b3cff'],
+  ['#00b37e', '#00c2d6'],
+  ['#ffae1f', '#ff5f3c'],
+];
+
+export function gradientFor(id: string): CSSProperties {
+  const index = fixture.runners.findIndex((r) => r.id === id);
+  const [g1, g2] = GRADIENTS[Math.max(0, index) % GRADIENTS.length]!;
+  return { ['--g1' as string]: g1, ['--g2' as string]: g2 };
+}
+
 export function Label({ children, className }: { children: ReactNode; className?: string }) {
   return <span className={className ? `label ${className}` : 'label'}>{children}</span>;
 }
@@ -27,8 +41,8 @@ export function Monogram({ id, size = 32 }: { id: string; size?: number }) {
   const name = runnersById.get(id)?.name ?? id;
   return (
     <span
-      className="mono-avatar"
-      style={{ width: size, height: size, fontSize: size * 0.42 }}
+      className="avatar"
+      style={{ width: size, height: size, fontSize: size * 0.4, ...gradientFor(id) }}
       aria-hidden
     >
       {name.slice(0, 1)}
@@ -37,8 +51,8 @@ export function Monogram({ id, size = 32 }: { id: string; size?: number }) {
 }
 
 export function Movement({ value }: { value: number }) {
-  if (value > 0) return <span className="move up">+{value}</span>;
-  if (value < 0) return <span className="move down">−{-value}</span>;
+  if (value > 0) return <span className="move up">▲ {value}</span>;
+  if (value < 0) return <span className="move down">▼ {-value}</span>;
   return <span className="move" />;
 }
 
@@ -50,6 +64,41 @@ export function Bar({ pct, from, label }: { pct: number; from?: number; label?: 
       <div className={pct >= 100 ? 'bar-fill done' : 'bar-fill'} style={{ width: `${width}%` }} />
       {from !== undefined && <div className="bar-prev" style={{ width: `${start}%` }} />}
     </div>
+  );
+}
+
+/** A circular gauge, Whoop-style: the arc fills to the percentage and glows when complete. */
+export function Ring({ id, pct, size = 64 }: { id: string; pct: number; size?: number }) {
+  const stroke = 6;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const filled = Math.max(0, Math.min(100, pct)) / 100;
+  const gid = `ring-${id}`;
+  const style = gradientFor(id) as Record<string, string>;
+  return (
+    <span className={pct >= 100 ? 'ring done' : 'ring'} style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={style['--g1']} />
+            <stop offset="100%" stopColor={style['--g2']} />
+          </linearGradient>
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={r} className="ring-track" strokeWidth={stroke} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={`url(#${gid})`}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${c * filled} ${c}`}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      </svg>
+      <span className="ring-value">{Math.round(pct)}</span>
+    </span>
   );
 }
 
@@ -66,7 +115,7 @@ export function Masthead({
     <header className="masthead">
       <div className="masthead-top">
         <Label>{kicker}</Label>
-        <Label className="dim">Demo · fictional runners</Label>
+        <span className="chip">Demo</span>
       </div>
       <h1>{title}</h1>
       {meta && <p className="masthead-meta">{meta}</p>}
@@ -99,20 +148,20 @@ export function StandingsTable({ rows, title }: { rows: StandingRow[]; title?: s
       {title && (
         <div className="section-head">
           <Label>{title}</Label>
-          <Label className="dim">Pts</Label>
+          <Label className="dim">Points</Label>
         </div>
       )}
       <ol className="table">
         {rows.map((row) => (
           <li key={row.runnerId} className={row.rank === 1 ? 'leader' : undefined}>
             <Link href={`/demo/runner/${row.runnerId}`} className="row">
-              <span className="row-rank">{pad2(row.rank)}</span>
-              <Monogram id={row.runnerId} />
+              <span className="row-rank">{row.rank}</span>
+              <Monogram id={row.runnerId} size={38} />
               <span className="row-name">
                 {runnerName(row.runnerId)}
-                <Label className="dim">
+                <small>
                   {row.duelWins} duel {row.duelWins === 1 ? 'win' : 'wins'}
-                </Label>
+                </small>
               </span>
               <Movement value={row.movement} />
               <span className="row-num">{row.points}</span>
@@ -124,26 +173,23 @@ export function StandingsTable({ rows, title }: { rows: StandingRow[]; title?: s
   );
 }
 
-/** This week's commitment progress for the whole crew, at the top of the feed. */
+/** This week's commitment progress for the whole crew, as ring gauges. */
 export function CrewProgress() {
   const week = [...result.weeks].reverse().find((w) => w.status !== 'upcoming') ?? result.weeks[0]!;
   return (
     <section className="section">
       <div className="section-head">
-        <Label>Week {week.weekIndex + 1} · commitments</Label>
+        <Label>Week {week.weekIndex + 1} commitments</Label>
         <Label className="dim">{week.status === 'closed' ? 'Final' : 'Live'}</Label>
       </div>
-      <ul className="progress-list">
+      <ul className="rings">
         {fixture.runners.map((r) => {
           const rw = week.runners.find((x) => x.runnerId === r.id)!;
           return (
             <li key={r.id}>
-              <Link href={`/demo/runner/${r.id}`} className="progress-row">
-                <span className="progress-name">{r.name}</span>
-                <Bar pct={rw.kmPct} />
-                <span className={rw.kmPct >= 100 ? 'progress-pct done' : 'progress-pct'}>
-                  {Math.round(rw.kmPct)}%
-                </span>
+              <Link href={`/demo/runner/${r.id}`} className="ring-cell">
+                <Ring id={r.id} pct={rw.kmPct} size={58} />
+                <span>{r.name}</span>
               </Link>
             </li>
           );
@@ -161,11 +207,11 @@ function kudosFor(itemId: string, authorId?: string) {
 function ItemHead({ runnerId, right }: { runnerId: string; right: string }) {
   return (
     <div className="item-head">
-      <Monogram id={runnerId} size={28} />
+      <Monogram id={runnerId} size={36} />
       <Link href={`/demo/runner/${runnerId}`} className="item-who">
         {runnerName(runnerId)}
+        <small>{right}</small>
       </Link>
-      <Label className="dim">{right}</Label>
     </div>
   );
 }
@@ -173,16 +219,23 @@ function ItemHead({ runnerId, right }: { runnerId: string; right: string }) {
 function runNote(ctx: RunContext): string {
   if (ctx.runNumber === undefined) return RUN_STATUS[ctx.run.status]!.label;
   return ctx.runNumber <= ctx.commitment.runs
-    ? `Run ${ctx.runNumber}/${ctx.commitment.runs}`
-    : `Run ${ctx.runNumber} · extra`;
+    ? `${ctx.runNumber} of ${ctx.commitment.runs}`
+    : `${ctx.runNumber} · extra`;
 }
 
-/** Distance, time and pace for one run, as on the feed and the run page. */
+/** Distance, time and pace for one run on a gradient card, as on the feed and the run page. */
 export function RunFigures({ ctx, size = 'feed' }: { ctx: RunContext; size?: 'feed' | 'hero' }) {
   const { run } = ctx;
   const status = RUN_STATUS[run.status]!;
   return (
-    <div className={`figures size-${size}`}>
+    <div className={`figures size-${size}`} style={gradientFor(ctx.runnerId)}>
+      <div className="figures-top">
+        <span>{formatDay(run.runDate)}</span>
+        <span className="figures-tags">
+          {run.bountyClaimed && <span className="glass">Bounty</span>}
+          <span className="glass">{run.source === 'strava' ? 'Strava' : 'Manual'}</span>
+        </span>
+      </div>
       <p className="figure-main">
         {(run.distanceM / 1000).toFixed(2)}
         <span>km</span>
@@ -193,12 +246,12 @@ export function RunFigures({ ctx, size = 'feed' }: { ctx: RunContext; size?: 'fe
           <dd>{formatDuration(run.durationS)}</dd>
         </div>
         <div>
-          <dt>Pace /km</dt>
-          <dd>{formatPace(run.durationS, run.distanceM).replace(' /km', '')}</dd>
+          <dt>Pace</dt>
+          <dd>{formatPace(run.durationS, run.distanceM).replace(' /km', '/km')}</dd>
         </div>
         <div>
-          <dt>Week {ctx.weekIndex + 1}</dt>
-          <dd className={status.tone === 'warn' ? 'warn' : undefined}>{runNote(ctx)}</dd>
+          <dt>{status.tone === 'warn' ? 'Status' : 'Run'}</dt>
+          <dd>{runNote(ctx)}</dd>
         </div>
       </dl>
     </div>
@@ -210,31 +263,24 @@ function RunItem({ item }: { item: Extract<FeedItem, { kind: 'run' }> }) {
   const counts = ctx.run.status === 'counted' || ctx.run.status === 'km-only';
   return (
     <article className="item">
-      <ItemHead runnerId={ctx.runnerId} right={formatDay(ctx.run.runDate)} />
+      <ItemHead runnerId={ctx.runnerId} right={`Week ${ctx.weekIndex + 1}`} />
       <Link href={`/demo/run/${ctx.run.activityId}`} className="item-body">
         <RunFigures ctx={ctx} />
       </Link>
       {counts && (
         <div className="item-progress">
-          <Bar pct={ctx.pctAfter} from={ctx.pctBefore} />
           <div className="spread">
-            <Label className="dim">
-              {Math.round(ctx.pctBefore)} → {Math.round(ctx.pctAfter)}% of{' '}
-              {formatKm(ctx.commitment.km)}
-            </Label>
-            {ctx.completedCommitment && <Label className="tick">Commitment kept</Label>}
+            <span className="small muted">
+              {ctx.completedCommitment
+                ? 'Commitment complete'
+                : `${Math.round(ctx.pctAfter)}% of ${formatKm(ctx.commitment.km)}`}
+            </span>
+            <span className="small strong">+{Math.round(ctx.pctAfter - ctx.pctBefore)}%</span>
           </div>
+          <Bar pct={ctx.pctAfter} from={ctx.pctBefore} />
         </div>
       )}
-      <div className="item-foot">
-        <Kudos {...kudosFor(item.id, ctx.runnerId)} />
-        <span className="item-tags">
-          {ctx.run.bountyClaimed && <Label className="tag-bounty">Bounty</Label>}
-          <Label className={`src ${ctx.run.source}`}>
-            {ctx.run.source === 'strava' ? 'Strava' : 'Manual'}
-          </Label>
-        </span>
-      </div>
+      <Kudos {...kudosFor(item.id, ctx.runnerId)} />
     </article>
   );
 }
@@ -244,38 +290,54 @@ function CommitItem({ item }: { item: Extract<FeedItem, { kind: 'commit' }> }) {
   const above = Math.round((item.km / runner.baselineKm - 1) * 100);
   return (
     <article className="item">
-      <ItemHead runnerId={item.runnerId} right={formatDay(item.at.slice(0, 10))} />
+      <ItemHead runnerId={item.runnerId} right={`Committed · ${formatDay(item.at.slice(0, 10))}`} />
       <div className="commit">
-        <Label className="dim">Commits to week {item.weekIndex + 1}</Label>
-        <p className="commit-figures">
-          {item.runs}
-          <span>runs</span>
-          {item.km}
-          <span>km</span>
-        </p>
+        <div>
+          <Label className="dim">Week {item.weekIndex + 1}</Label>
+          <p className="commit-figures">
+            {item.runs} runs · {item.km} km
+          </p>
+        </div>
         {above !== 0 && (
-          <Label className={above > 0 ? 'tick' : 'dim'}>
-            {above > 0 ? `+${above}` : above}% vs usual week
-          </Label>
+          <span className={above > 0 ? 'delta up' : 'delta'}>
+            {above > 0 ? `+${above}` : above}%
+          </span>
         )}
       </div>
-      <div className="item-foot">
-        <Kudos {...kudosFor(item.id, item.runnerId)} />
-      </div>
+      <Kudos {...kudosFor(item.id, item.runnerId)} />
     </article>
   );
 }
 
 function OvertakeItem({ item }: { item: Extract<FeedItem, { kind: 'overtake' }> }) {
   return (
-    <article className="item band">
-      <Link href={`/demo/run/${item.activityId}`} className="band-body">
-        <Label className="tick">Overtake</Label>
-        <p className="band-line">
-          {runnerName(item.runnerId)} moves to {ordinal(item.rank)}
-        </p>
-        <Label className="dim">Passing {item.passed.map(runnerName).join(' and ')}</Label>
+    <article className="item">
+      <Link
+        href={`/demo/run/${item.activityId}`}
+        className="overtake"
+        style={gradientFor(item.runnerId)}
+      >
+        <span className="overtake-icon" aria-hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path
+              d="M12 19V5M5.5 11.5 12 5l6.5 6.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        <div>
+          <Label>Overtake</Label>
+          <p className="overtake-line">
+            {runnerName(item.runnerId)} moves to {ordinal(item.rank)}
+          </p>
+          <p className="overtake-sub">Passing {item.passed.map(runnerName).join(' and ')}</p>
+        </div>
       </Link>
+      <Kudos {...kudosFor(item.id)} />
     </article>
   );
 }
@@ -287,34 +349,33 @@ function WeekItem({ item }: { item: Extract<FeedItem, { kind: 'week' }> }) {
     <article className="item">
       <Link href={`/demo/week/${item.weekIndex + 1}`} className="item-body">
         <div className="spread">
-          <Label>Week {item.weekIndex + 1} · final</Label>
-          <Label className="dim">
+          <strong className="item-title">Week {item.weekIndex + 1} results</strong>
+          <span className="small muted">
             {formatShortDate(week.startDate)} – {formatShortDate(week.endDate)}
-          </Label>
+          </span>
         </div>
-        <ol className="mini-table">
+        <ol className="podium">
           {top.map((rw, i) => (
-            <li key={rw.runnerId}>
-              <span className="row-rank">{pad2(i + 1)}</span>
-              <span>{runnerName(rw.runnerId)}</span>
-              <span className="row-num">{rw.points}</span>
+            <li key={rw.runnerId} style={gradientFor(rw.runnerId)}>
+              <span className="podium-place">{ordinal(i + 1)}</span>
+              <Monogram id={rw.runnerId} size={40} />
+              <strong>{runnerName(rw.runnerId)}</strong>
+              <span className="podium-pts">{rw.points}</span>
             </li>
           ))}
         </ol>
         <ul className="duel-lines">
           {week.duels.map((d, i) => (
             <li key={i}>
-              <Label className="dim">
-                {d.sides.map((s) => runnerName(s.runnerId)).join(' / ')}
-              </Label>
-              <Label>{d.summary.replace(/\.$/, '')}</Label>
+              <span className="muted">
+                {d.sides.map((s) => runnerName(s.runnerId)).join(' vs ')}
+              </span>
+              <strong>{d.summary.replace(/\.$/, '')}</strong>
             </li>
           ))}
         </ul>
       </Link>
-      <div className="item-foot">
-        <Kudos {...kudosFor(item.id)} />
-      </div>
+      <Kudos {...kudosFor(item.id)} />
     </article>
   );
 }

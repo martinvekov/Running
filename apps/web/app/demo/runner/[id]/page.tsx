@@ -11,7 +11,7 @@ import {
   RULE_LABELS,
   RUN_STATUS,
 } from '../../_lib/format';
-import { Bar, Label, ordinal } from '../../_lib/ui';
+import { Bar, gradientFor, Label, Monogram, ordinal } from '../../_lib/ui';
 
 export function generateStaticParams() {
   return fixture.runners.map((r) => ({ id: r.id }));
@@ -45,20 +45,22 @@ export default async function DemoRunnerPage({ params }: { params: Promise<{ id:
   return (
     <main className="page with-tabbar">
       <Link href="/demo/standings" className="back">
-        <Label>← Standings</Label>
+        ← Standings
       </Link>
 
-      <header className="masthead">
-        <div className="masthead-top">
-          <Label>{runner.persona}</Label>
-          <Label className="dim">
+      <header className="profile" style={gradientFor(id)}>
+        <Monogram id={id} size={64} />
+        <div className="profile-main">
+          <h1>{runner.name}</h1>
+          <p>{runner.persona}</p>
+          <p className="profile-sub">
             Usual week {runner.baselineKm} km · {runner.baselineRuns} runs
-          </Label>
+          </p>
         </div>
-        <h1>{runner.name}</h1>
-        <p className="masthead-meta">
-          {ordinal(standing.rank)} · {standing.points} points
-        </p>
+        <div className="profile-score">
+          <strong>{standing.points}</strong>
+          <span>{ordinal(standing.rank)}</span>
+        </div>
       </header>
 
       <dl className="stat-strip">

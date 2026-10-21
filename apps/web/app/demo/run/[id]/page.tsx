@@ -62,16 +62,19 @@ export default async function DemoRunPage({ params }: { params: Promise<{ id: st
     <main className="page with-tabbar">
       <div className="spread">
         <Link href="/demo" className="back">
-          <Label>← Feed</Label>
+          ← Feed
         </Link>
-        <Label className="dim">{ctx.run.source === 'strava' ? 'Strava' : 'Manual entry'}</Label>
       </div>
 
       <header className="run-head">
         <Link href={`/demo/runner/${runner.id}`} className="item-head">
-          <Monogram id={runner.id} size={28} />
-          <span className="item-who">{runner.name}</span>
-          <Label className="dim">{formatDay(ctx.run.runDate)}</Label>
+          <Monogram id={runner.id} size={36} />
+          <span className="item-who">
+            {runner.name}
+            <small>
+              Week {ctx.weekIndex + 1} · {formatDay(ctx.run.runDate)}
+            </small>
+          </span>
         </Link>
         <RunFigures ctx={ctx} size="hero" />
         <Kudos initial={kudos} names={kudos.by.map(runnerName)} />
