@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { DemoKudos } from './reactions';
 
 export type TabMode = 'demo' | 'season' | 'crew';
@@ -71,14 +71,19 @@ export function TabBar({
 }) {
   const pathname = usePathname();
   const items = tabs(base, duelsWeek, mode);
+  // Highlight a tab the moment it is tapped, before the next page has arrived.
+  const [tapped, setTapped] = useState<{ href: string; from: string } | null>(null);
+  useEffect(() => setTapped(null), [pathname]);
   return (
     <nav className={items.length > 3 ? 'tabbar many' : 'tabbar'} aria-label="Sections">
       {items.map((tab) => {
-        const active = tab.match(pathname);
+        const active =
+          tapped && tapped.from === pathname ? tapped.href === tab.href : tab.match(pathname);
         return (
           <Link
             key={tab.href}
             href={tab.href}
+            onClick={() => setTapped({ href: tab.href, from: pathname })}
             className={active ? 'tabbar-item active' : 'tabbar-item'}
             aria-current={active ? 'page' : undefined}
           >
