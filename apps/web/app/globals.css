@@ -1,21 +1,26 @@
 :root {
-  --bg: #ebecee;
-  --card: #fff;
-  --ink: #16181d;
-  --ink-2: #4a4e58;
-  --dim: #8a8e99;
-  --line: #eceef1;
-  --track: #e3e5e9;
-  --graphite-1: #3b3f48;
-  --graphite-2: #1c1e24;
-  --accent: #14c8a0;
-  --accent-soft: rgba(20, 200, 160, 0.16);
-  --accent-ink: #0b8a6c;
-  --up: #0b8a6c;
-  --down: #c2453f;
-  --warn: #b8690f;
+  /* Brand: burnt orange and warm cream, from the Misogi mark. */
+  --bg: #f1e9de;
+  --card: #fbf7f1;
+  --ink: #1d130e;
+  --ink-2: #5b5047;
+  --dim: #968b7e;
+  --line: #ebe2d4;
+  --track: #e4dacb;
+  --graphite-1: #3a2a20;
+  --graphite-2: #1d130e;
+  --accent: #b8441b;
+  --accent-soft: rgba(203, 72, 24, 0.13);
+  --accent-ink: #a83a14;
+  --up: #a83a14;
+  --down: #a8321f;
+  --warn: #a8641a;
+  --cream: #faeee4;
+  --ember: linear-gradient(135deg, #cc5a2c 0%, #b04420 50%, #7e2e18 100%);
+  /* Film grain: neutral grey noise blended over a colour with `overlay`, so it lightens and darkens it. */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 1'/><feComponentTransfer><feFuncR type='linear' slope='1.9' intercept='-0.55'/><feFuncG type='linear' slope='1.9' intercept='-0.55'/><feFuncB type='linear' slope='1.9' intercept='-0.55'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   --radius: 18px;
-  --shadow: 0 1px 2px rgba(20, 22, 30, 0.05), 0 4px 14px rgba(20, 22, 30, 0.04);
+  --shadow: 0 1px 2px rgba(60, 30, 10, 0.05), 0 4px 14px rgba(60, 30, 10, 0.04);
   --sans: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color-scheme: light;
 }
@@ -230,7 +235,7 @@ button {
 .seg-item.active {
   background: var(--card);
   color: var(--ink);
-  box-shadow: 0 2px 8px rgba(20, 22, 60, 0.1);
+  box-shadow: 0 2px 8px rgba(60, 30, 10, 0.1);
 }
 
 /* Avatars */
@@ -1032,8 +1037,8 @@ button {
   backdrop-filter: blur(20px) saturate(1.6);
   -webkit-backdrop-filter: blur(20px) saturate(1.6);
   box-shadow:
-    0 10px 30px rgba(20, 22, 60, 0.14),
-    0 0 0 1px rgba(20, 22, 60, 0.04);
+    0 10px 30px rgba(60, 30, 10, 0.16),
+    0 0 0 1px rgba(60, 30, 10, 0.06);
   z-index: 20;
 }
 
@@ -1829,10 +1834,10 @@ button {
    ------------------------------------------------------------------------------------------ */
 
 :root {
-  --radius: 12px;
-  --hair: rgba(22, 24, 29, 0.08);
-  --plate: #131519;
-  --plate-line: rgba(255, 255, 255, 0.12);
+  --radius: 16px;
+  --hair: rgba(60, 30, 10, 0.09);
+  --plate: #1d130e;
+  --plate-line: rgba(255, 255, 255, 0.2);
   --shadow: none;
 }
 
@@ -1885,12 +1890,91 @@ button {
   color: var(--dim);
 }
 
-/* The run plate: flat graphite, big numerals, a hairline-ruled stat row. */
+/* The run card: a rich brand gradient with a soft glow, grain and the layered mark behind. */
 .figures {
-  gap: 16px;
-  padding: 16px 16px 14px;
-  border-radius: 8px;
-  background: var(--plate);
+  isolation: isolate;
+  gap: 18px;
+  padding: 18px 18px 16px;
+  border-radius: 24px;
+  background: var(--grain), var(--g-glow), var(--g-shade), var(--g-base);
+  background-blend-mode: overlay, normal, normal, normal;
+  background-size: 140px, auto, auto, auto;
+  box-shadow: 0 10px 22px -14px var(--g-drop);
+}
+
+.figures > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* The five layered bars of the mark, large and faint at the corner. */
+.figures::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: -14px;
+  right: -26px;
+  width: 170px;
+  height: 140px;
+  opacity: 0.16;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 160'><g fill='%23faeee4'><polygon points='34,6 154,6 140,28 20,28'/><polygon points='62,38 182,38 168,60 48,60'/><polygon points='34,70 154,70 140,92 20,92'/><polygon points='62,102 182,102 168,124 48,124'/><polygon points='34,134 154,134 140,156 20,156'/></g></svg>")
+    no-repeat center / contain;
+  pointer-events: none;
+}
+
+/* One gradient per person: electric blue through violet and coral to orange. */
+.tone-0 {
+  --g-base: linear-gradient(
+    135deg,
+    #1f3fd8 0%,
+    #4b3fc4 28%,
+    #c4405a 58%,
+    #f07a2c 85%,
+    #ffb877 100%
+  );
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(75, 63, 196, 0.55);
+}
+
+.tone-1 {
+  --g-base: linear-gradient(150deg, #2a5ae0 0%, #7a3fc0 30%, #d4466a 62%, #f58f3a 100%);
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(122, 63, 192, 0.5);
+}
+
+.tone-2 {
+  --g-base: linear-gradient(120deg, #2f35c0 0%, #6a3aa8 35%, #bf3a52 68%, #e8662a 100%);
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(106, 58, 168, 0.5);
+}
+
+.tone-3 {
+  --g-base: linear-gradient(160deg, #1f6fd8 0%, #5a4fc8 30%, #cc4f6a 60%, #f0a040 100%);
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(90, 79, 200, 0.5);
+}
+
+.tone-4 {
+  --g-base: linear-gradient(140deg, #3a3fd0 0%, #8a3aa0 35%, #d8503e 70%, #ffb060 100%);
+  --g-glow: linear-gradient(transparent, transparent);
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(138, 58, 160, 0.5);
+}
+
+/* Avatars share their person's gradient. */
+.avatar.tone-0,
+.avatar.tone-1,
+.avatar.tone-2,
+.avatar.tone-3,
+.avatar.tone-4 {
+  background: var(--grain), var(--g-glow), var(--g-base);
+  background-blend-mode: overlay, normal, normal;
+  background-size: 120px, auto, auto;
+  box-shadow: none;
 }
 
 .figures-top {
@@ -1913,7 +1997,7 @@ button {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 244, 232, 0.8);
 }
 
 .glass::before {
@@ -1921,7 +2005,7 @@ button {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--cream);
 }
 
 .figure-main {
@@ -1937,7 +2021,7 @@ button {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  opacity: 0.5;
+  opacity: 0.75;
 }
 
 .size-hero .figure-main {
@@ -1969,7 +2053,7 @@ button {
   font-weight: 650;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  opacity: 0.5;
+  opacity: 0.72;
 }
 
 .figure-grid dd {
@@ -1979,7 +2063,7 @@ button {
 }
 
 .size-hero {
-  border-radius: 8px;
+  border-radius: 28px;
 }
 
 /* Progress against the commitment: a thin square-ended rule. */
@@ -1998,8 +2082,10 @@ button {
 }
 
 .overtake {
-  border-radius: 8px;
-  background: var(--plate);
+  border-radius: 24px;
+  background: var(--grain), var(--g-glow), var(--g-shade), var(--g-base);
+  background-blend-mode: overlay, normal, normal, normal;
+  background-size: 180px, auto, auto, auto;
 }
 
 .commit {
@@ -2158,4 +2244,267 @@ button {
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* Brand colour on the controls. */
+.btn-primary {
+  background: var(--grain), var(--ember);
+  background-blend-mode: overlay, normal;
+  background-size: 140px, auto;
+  box-shadow: 0 8px 18px -12px rgba(126, 46, 24, 0.75);
+}
+
+.tabbar-item.active {
+  background: var(--grain), var(--ember);
+  background-blend-mode: overlay, normal;
+  background-size: 120px, auto;
+  box-shadow: none;
+}
+
+.tabbar {
+  background: rgba(251, 247, 241, 0.88);
+}
+
+.seg-item.active {
+  background: var(--card);
+  box-shadow: 0 1px 0 var(--hair);
+}
+
+.leader .row-num {
+  color: var(--accent-ink);
+}
+
+.item,
+.section {
+  background: var(--card);
+}
+
+.item-who small,
+.pts-badge.zero {
+  color: var(--dim);
+}
+
+/* Brand colour in the data. */
+.bar-fill {
+  background: var(--ember);
+}
+
+.bar-prev {
+  background: #d8c7b4;
+}
+
+.ring-arc {
+  stroke: var(--accent);
+}
+
+.col-fill {
+  background: #ddd0bd;
+}
+
+.col.this .col-fill {
+  background: var(--ember);
+}
+
+.chip {
+  background: var(--track);
+  color: var(--ink-2);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Full-bleed feed: posts run edge to edge with a plain strip between them. The colour block has
+   no inset, border or rounded corners, and the like and comment controls are quiet line icons.
+   ------------------------------------------------------------------------------------------ */
+
+.feed {
+  gap: 0;
+}
+
+.feed .item {
+  gap: 0;
+  margin-inline: -16px;
+  padding: 0;
+  border: 0;
+  border-bottom: 8px solid var(--track);
+  border-radius: 0;
+  background: none;
+}
+
+.feed .item > *:not(.item-body) {
+  margin-inline: 16px;
+}
+
+.feed .item > .overtake {
+  margin-inline: 0;
+  border-radius: 0;
+}
+
+.feed .item-head {
+  min-height: 0;
+  padding-block: 12px;
+}
+
+.feed .item-progress {
+  padding-top: 12px;
+}
+
+.feed .figures {
+  min-height: 244px;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 20px 20px;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.feed .figures::after {
+  top: -10px;
+  right: -30px;
+  width: 210px;
+  height: 172px;
+}
+
+.feed .figure-main {
+  margin: 0;
+  font-size: 52px;
+}
+
+.feed .figure-main span {
+  font-size: 11px;
+}
+
+.feed .figure-grid dt {
+  font-size: 9.5px;
+}
+
+.feed .figure-grid dd {
+  font-size: 15px;
+}
+
+.feed .social {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.feed .social-btn {
+  gap: 6px;
+  padding: 0 16px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.social-btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+.social-btn svg path {
+  stroke-width: 1.4;
+}
+
+.feed .latest-comment {
+  padding: 0 0 14px;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Only the run cards carry the brand colour: grainy blue with a blood-orange glow. The rest of
+   the app is neutral graphite with a quiet blue accent.
+   ------------------------------------------------------------------------------------------ */
+
+:root {
+  --accent: #2c40c0;
+  --accent-ink: #2433a8;
+  --accent-soft: rgba(44, 64, 192, 0.12);
+  --up: #2433a8;
+  --ember: linear-gradient(#26201c, #26201c);
+}
+
+.btn-primary {
+  box-shadow: none;
+}
+
+.bar-fill,
+.col.this .col-fill {
+  background: var(--accent);
+}
+
+.tone-0 {
+  --g-base: linear-gradient(160deg, #1d38cc 0%, #162a96 55%, #0d1b6e 100%);
+  --g-glow: radial-gradient(
+    95% 80% at 100% 100%,
+    #f2581b 0%,
+    rgba(226, 80, 26, 0.72) 32%,
+    transparent 70%
+  );
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(22, 42, 150, 0.6);
+}
+
+.tone-1 {
+  --g-base: linear-gradient(160deg, #2c30b4 0%, #1c1c7c 55%, #0f1052 100%);
+  --g-glow: radial-gradient(
+    95% 80% at 0% 100%,
+    #ee5018 0%,
+    rgba(220, 76, 24, 0.7) 32%,
+    transparent 70%
+  );
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(28, 28, 124, 0.6);
+}
+
+.tone-2 {
+  --g-base: linear-gradient(160deg, #215ada 0%, #173ea4 55%, #0e266c 100%);
+  --g-glow: radial-gradient(
+    85% 90% at 100% 55%,
+    #f4601c 0%,
+    rgba(230, 84, 26, 0.7) 30%,
+    transparent 68%
+  );
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(23, 62, 164, 0.6);
+}
+
+.tone-3 {
+  --g-base: linear-gradient(160deg, #2072c4 0%, #174c94 55%, #0e2d60 100%);
+  --g-glow: radial-gradient(
+    110% 80% at 80% 100%,
+    #f05a1a 0%,
+    rgba(224, 78, 24, 0.7) 32%,
+    transparent 70%
+  );
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(23, 76, 148, 0.6);
+}
+
+.tone-4 {
+  --g-base: linear-gradient(160deg, #1d2c8e 0%, #121c62 55%, #0a103c 100%);
+  --g-glow: radial-gradient(
+    100% 75% at 45% 108%,
+    #f2581b 0%,
+    rgba(226, 80, 26, 0.72) 34%,
+    transparent 72%
+  );
+  --g-shade: linear-gradient(transparent, transparent);
+  --g-drop: rgba(18, 28, 98, 0.6);
+}
+
+/* Bigger cards, with the distance sitting right above the time, pace and run. */
+.feed .figures {
+  min-height: 340px;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 24px 20px 22px;
+}
+
+.feed .figure-main {
+  margin-top: auto;
+}
+
+/* Avatars go back to a plain dark plate with the initial. */
+.avatar.tone-0,
+.avatar.tone-1,
+.avatar.tone-2,
+.avatar.tone-3,
+.avatar.tone-4 {
+  background: var(--plate);
 }

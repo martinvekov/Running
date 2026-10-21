@@ -44,7 +44,7 @@ export function LikeButton({
             strokeLinejoin="round"
           />
         </svg>
-        <span>{state.count > 0 ? state.count : 'Like'}</span>
+        {state.count > 0 && <span>{state.count}</span>}
       </button>
     </form>
   );

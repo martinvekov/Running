@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { maxWeeklyPoints, rulesV1, type RuleId, type StandingRow } from '@crew/engine';
 import { leadLine } from './lead';
+import { toneOf } from './tone';
 import { SocialBar } from './run-social';
 import type { SeasonView } from './view';
 import { Kudos } from './client';
@@ -25,10 +26,18 @@ export function Label({ children, className }: { children: ReactNode; className?
   return <span className={className ? `label ${className}` : 'label'}>{children}</span>;
 }
 
-export function Monogram({ name, size = 32 }: { name: string; size?: number }) {
+export function Monogram({
+  name,
+  tone = toneOf(name),
+  size = 32,
+}: {
+  name: string;
+  tone?: number;
+  size?: number;
+}) {
   return (
     <span
-      className="avatar"
+      className={`avatar tone-${tone}`}
       style={{ width: size, height: size, fontSize: size * 0.4 }}
       aria-hidden
     >
@@ -154,7 +163,11 @@ export function StandingsTable({
           >
             <Link href={`${view.base}/runner/${row.runnerId}`} className="row">
               <span className="row-rank">{row.rank}</span>
-              <Monogram name={view.runnerName(row.runnerId)} size={38} />
+              <Monogram
+                name={view.runnerName(row.runnerId)}
+                tone={view.toneOf(row.runnerId)}
+                size={38}
+              />
               <span className="row-name">
                 {runnerName(row.runnerId)}
                 <small>
@@ -199,7 +212,11 @@ export function StandingsCard({ view }: { view: SeasonView }) {
           <li key={row.runnerId}>
             <Link href={`${view.base}/runner/${row.runnerId}`} className="row">
               <span className="row-rank">{row.rank}</span>
-              <Monogram name={view.runnerName(row.runnerId)} size={30} />
+              <Monogram
+                name={view.runnerName(row.runnerId)}
+                tone={view.toneOf(row.runnerId)}
+                size={30}
+              />
               <span className="row-name">
                 <span className="row-name-top">
                   {runnerName(row.runnerId)}
@@ -452,7 +469,7 @@ function ItemHead({
   const { runnerName } = view;
   return (
     <div className="item-head">
-      <Monogram name={view.runnerName(runnerId)} size={32} />
+      <Monogram name={view.runnerName(runnerId)} tone={view.toneOf(runnerId)} size={32} />
       {view.runnersById.has(runnerId) ? (
         <Link href={`${view.base}/runner/${runnerId}`} className="item-who">
           {runnerName(runnerId)}
@@ -491,11 +508,19 @@ function runNote(ctx: RunContext): string {
 }
 
 /** Distance, time and pace for one run on a gradient card, as on the feed and the run page. */
-export function RunFigures({ ctx, size = 'feed' }: { ctx: RunContext; size?: 'feed' | 'hero' }) {
+export function RunFigures({
+  ctx,
+  tone,
+  size = 'feed',
+}: {
+  ctx: RunContext;
+  tone: number;
+  size?: 'feed' | 'hero';
+}) {
   const { run } = ctx;
   const status = RUN_STATUS[run.status]!;
   return (
-    <div className={`figures size-${size}`}>
+    <div className={`figures size-${size} tone-${tone}`}>
       <div className="figures-top">
         <span className="figures-tags">
           {run.bountyClaimed && <span className="glass">Bounty</span>}
@@ -536,7 +561,7 @@ function RunItem({ view, item }: { view: SeasonView; item: Extract<FeedItem, { k
         badge={<PointsBadge ctx={ctx} />}
       />
       <Link href={`${view.base}/run/${ctx.run.activityId}`} className="item-body">
-        <RunFigures ctx={ctx} />
+        <RunFigures ctx={ctx} tone={view.toneOf(ctx.runnerId)} />
       </Link>
       {counts && (
         <div className="item-progress">
@@ -603,7 +628,10 @@ function OvertakeItem({
   const { runnerName } = view;
   return (
     <article className="item">
-      <Link href={`${view.base}/run/${item.activityId}`} className="overtake">
+      <Link
+        href={`${view.base}/run/${item.activityId}`}
+        className={`overtake tone-${view.toneOf(item.runnerId)}`}
+      >
         <span className="overtake-icon" aria-hidden>
           <svg viewBox="0 0 24 24" width="20" height="20">
             <path
@@ -646,7 +674,11 @@ function WeekItem({ view, item }: { view: SeasonView; item: Extract<FeedItem, { 
           {top.map((rw, i) => (
             <li key={rw.runnerId}>
               <span className="podium-place">{ordinal(i + 1)}</span>
-              <Monogram name={view.runnerName(rw.runnerId)} size={40} />
+              <Monogram
+                name={view.runnerName(rw.runnerId)}
+                tone={view.toneOf(rw.runnerId)}
+                size={40}
+              />
               <strong>{runnerName(rw.runnerId)}</strong>
               <span className="podium-pts">{rw.points}</span>
             </li>
@@ -677,7 +709,7 @@ function PastRunItem({
 }) {
   const start = view.input.season.startDate;
   const figures = (
-    <div className="figures size-feed">
+    <div className={`figures size-feed tone-${view.toneOf(item.runnerId)}`}>
       <div className="figures-top">
         <span className="figures-tags">
           <span className="glass">{item.source === 'strava' ? 'Strava' : 'Manual'}</span>

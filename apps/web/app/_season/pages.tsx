@@ -124,7 +124,7 @@ export function RunScreen({
 
       <header className="run-head">
         <Link href={`${view.base}/runner/${runner.id}`} className="item-head">
-          <Monogram name={runner.name} size={36} />
+          <Monogram name={runner.name} tone={view.toneOf(runner.id)} size={36} />
           <span className="item-who">
             {runner.name}
             <small>
@@ -132,7 +132,7 @@ export function RunScreen({
             </small>
           </span>
         </Link>
-        <RunFigures ctx={ctx} size="hero" />
+        <RunFigures ctx={ctx} tone={view.toneOf(ctx.runnerId)} size="hero" />
         {view.demo ? (
           <Kudos initial={kudos} names={kudos.by.map(runnerName)} />
         ) : (
@@ -269,7 +269,11 @@ export function WeekScreen({ view, weekParam }: { view: SeasonView; weekParam: s
                 href={`${view.base}/runner/${side.runnerId}`}
                 className="duel-row"
               >
-                <Monogram name={runnerName(side.runnerId)} size={28} />
+                <Monogram
+                  name={runnerName(side.runnerId)}
+                  tone={view.toneOf(side.runnerId)}
+                  size={28}
+                />
                 <div className="duel-main">
                   <div className="spread">
                     <span className="duel-name">{runnerName(side.runnerId)}</span>
@@ -348,7 +352,7 @@ export function RunnerScreen({ view, id }: { view: SeasonView; id: string }) {
       </Link>
 
       <header className="profile">
-        <Monogram name={runner.name} size={64} />
+        <Monogram name={runner.name} tone={view.toneOf(runner.id)} size={64} />
         <div className="profile-main">
           <h1>{runner.name}</h1>
           {runner.persona && <p>{runner.persona}</p>}
@@ -468,14 +472,18 @@ export function PastRunScreen({
       </Link>
       <header className="run-head">
         <div className="item-head">
-          <Monogram name={view.runnerName(run.runnerId)} size={36} />
+          <Monogram
+            name={view.runnerName(run.runnerId)}
+            tone={view.toneOf(run.runnerId)}
+            size={36}
+          />
           <span className="item-who">
             {view.runnerName(run.runnerId)}
             <small>{formatDay(run.runDate)}</small>
           </span>
           <span className="pts-badge zero">Not scored</span>
         </div>
-        <div className="figures size-hero">
+        <div className={`figures size-hero tone-${view.toneOf(run.runnerId)}`}>
           <div className="figures-top">
             <span className="figures-tags">
               <span className="glass">{run.source === 'strava' ? 'Strava' : 'Manual'}</span>

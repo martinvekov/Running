@@ -6,6 +6,7 @@ import {
   type SeasonResult,
 } from '@crew/engine';
 import type { RunSocial } from '@/lib/social-data';
+import { toneIn } from './tone';
 import { buildFeedData, weekDays, type FeedItem, type RunContext } from './feed';
 
 /** A runner as the screens see them. The demo crew has a one-line persona; real runners don't. */
@@ -47,6 +48,8 @@ export interface SeasonView {
   runners: ViewRunner[];
   runnersById: Map<string, ViewRunner>;
   runnerName: (id: string) => string;
+  /** The gradient tone for a person, from their place in the crew. */
+  toneOf: (id: string) => number;
   runContexts: Map<string, RunContext>;
   feed: FeedItem[];
   weekDays: (runnerId: string, weekIndex: number) => { date: string; km: number }[];
@@ -75,6 +78,8 @@ export function buildSeasonView(
   const outsideRuns = (options.outsideRuns ?? []).filter((r) => !seasonIds.has(r.id));
   const { runContexts, feed } = buildFeedData(input, result, outsideRuns);
   const otherNames = options.otherNames ?? {};
+  // Everyone in the crew, season runners first, so tones stay put as the season changes.
+  const crewOrder = [...runners.map((r) => r.id), ...Object.keys(otherNames)];
   return {
     base: options.base,
     crewName: options.crewName,
@@ -89,6 +94,7 @@ export function buildSeasonView(
     runners,
     runnersById,
     runnerName: (id) => runnersById.get(id)?.name ?? otherNames[id] ?? 'Runner',
+    toneOf: (id) => toneIn(crewOrder, id),
     runContexts,
     feed,
     weekDays: (runnerId, weekIndex) => weekDays(result, runnerId, weekIndex),
