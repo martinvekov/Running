@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { NotConnected } from '@/components/not-connected';
 import { requireUser } from '@/lib/auth';
 import { isInviteCode } from '@/lib/invite';
+import { SubmitButton } from '@/components/submit-button';
 import { supabaseEnv } from '@/lib/supabase/env';
 
 export const metadata: Metadata = { title: 'Join a crew · Crew Seasons' };
@@ -46,9 +47,9 @@ export default async function JoinPage({
       )}
       <form action={joinCrew} className="stack">
         <input type="hidden" name="code" value={code} />
-        <button type="submit" className="btn-primary">
+        <SubmitButton className="btn-primary" pending="Joining…">
           Join crew
-        </button>
+        </SubmitButton>
       </form>
     </main>
   );

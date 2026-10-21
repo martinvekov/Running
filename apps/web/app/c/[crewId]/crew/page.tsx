@@ -10,6 +10,7 @@ import { upcomingMondays } from '@/lib/season-forms';
 import { formatShortDate } from '@/app/_season/format';
 import { planSeason, saveBaseline, startSeason } from '../actions';
 import { inviteMessage, inviteUrl, whatsappShareUrl } from '@/lib/invite';
+import { SubmitButton } from '@/components/submit-button';
 import { supabaseEnv } from '@/lib/supabase/env';
 
 export const metadata: Metadata = { title: 'Crew · Crew Seasons' };
@@ -118,9 +119,9 @@ export default async function CrewPage({
                   <input name={`bounty${i}`} maxLength={80} placeholder="A run before 7am" />
                 </label>
               ))}
-              <button type="submit" className="btn-primary">
+              <SubmitButton className="btn-primary" pending="Planning…">
                 Plan season {(season?.number ?? 0) + 1}
-              </button>
+              </SubmitButton>
             </form>
           ) : (
             <p className="note">Waiting for the organiser to plan the next season.</p>
@@ -167,9 +168,9 @@ export default async function CrewPage({
                   required
                 />
               </label>
-              <button type="submit" className="btn-primary">
+              <SubmitButton className="btn-primary" pending="Saving…">
                 {mine ? 'Update my usual week' : 'Save my usual week'}
-              </button>
+              </SubmitButton>
             </form>
             <p className="note">
               Ready: {(baselines ?? []).length} of {people.length}.{' '}
@@ -178,9 +179,9 @@ export default async function CrewPage({
             {isOrganiser && (
               <form action={startSeason}>
                 <input type="hidden" name="crewId" value={crewId} />
-                <button type="submit" className="btn-secondary">
+                <SubmitButton className="btn-secondary" pending="Starting…">
                   Start the season
-                </button>
+                </SubmitButton>
               </form>
             )}
           </div>

@@ -4,6 +4,7 @@ import { NotConnected } from '@/components/not-connected';
 import { requireUser } from '@/lib/auth';
 import { cleanDisplayName, MAX_NAME_LENGTH, suggestDisplayName } from '@/lib/names';
 import { safeNext } from '@/lib/next-path';
+import { SubmitButton } from '@/components/submit-button';
 import { supabaseEnv } from '@/lib/supabase/env';
 
 export const metadata: Metadata = { title: 'Welcome · Crew Seasons' };
@@ -57,9 +58,9 @@ export default async function WelcomePage({
         {error === 'save' && (
           <p className="error-note">Couldn&apos;t save that. Please try again.</p>
         )}
-        <button type="submit" className="btn-primary">
+        <SubmitButton className="btn-primary" pending="Saving…">
           Continue
-        </button>
+        </SubmitButton>
       </form>
     </main>
   );
