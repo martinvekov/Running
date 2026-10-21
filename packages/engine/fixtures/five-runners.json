@@ -1,0 +1,591 @@
+{
+  "$comment": "Five fictional runners over one three-week season. Run with: pnpm sim fixtures/five-runners.json",
+  "crewName": "Demo crew",
+  "season": {
+    "id": "demo-season-1",
+    "startDate": "2026-11-02",
+    "rulesVersion": "v1"
+  },
+  "runners": [
+    {
+      "id": "alex",
+      "name": "Alex",
+      "persona": "Steady veteran",
+      "baselineKm": 32,
+      "baselineRuns": 4
+    },
+    {
+      "id": "priya",
+      "name": "Priya",
+      "persona": "Ambitious improver",
+      "baselineKm": 15,
+      "baselineRuns": 3
+    },
+    {
+      "id": "dan",
+      "name": "Dan",
+      "persona": "Sandbagger",
+      "baselineKm": 25,
+      "baselineRuns": 3
+    },
+    {
+      "id": "sam",
+      "name": "Sam",
+      "persona": "Busy parent who misses week two",
+      "baselineKm": 20,
+      "baselineRuns": 3
+    },
+    {
+      "id": "jo",
+      "name": "Jo",
+      "persona": "Beginner",
+      "baselineKm": 8,
+      "baselineRuns": 2
+    }
+  ],
+  "commitments": [
+    {
+      "runnerId": "alex",
+      "weekIndex": 0,
+      "km": 32,
+      "runs": 4,
+      "committedAt": "2026-11-01T18:00:00Z"
+    },
+    {
+      "runnerId": "alex",
+      "weekIndex": 1,
+      "km": 32,
+      "runs": 4,
+      "committedAt": "2026-11-08T18:00:00Z"
+    },
+    {
+      "runnerId": "alex",
+      "weekIndex": 2,
+      "km": 32,
+      "runs": 4,
+      "committedAt": "2026-11-15T18:00:00Z"
+    },
+    {
+      "runnerId": "priya",
+      "weekIndex": 0,
+      "km": 19.5,
+      "runs": 4,
+      "committedAt": "2026-11-01T18:00:00Z"
+    },
+    {
+      "runnerId": "priya",
+      "weekIndex": 1,
+      "km": 19.5,
+      "runs": 4,
+      "committedAt": "2026-11-08T18:00:00Z"
+    },
+    {
+      "runnerId": "priya",
+      "weekIndex": 2,
+      "km": 19.5,
+      "runs": 4,
+      "committedAt": "2026-11-15T18:00:00Z"
+    },
+    {
+      "runnerId": "dan",
+      "weekIndex": 0,
+      "km": 20,
+      "runs": 2,
+      "committedAt": "2026-11-01T18:00:00Z"
+    },
+    {
+      "runnerId": "dan",
+      "weekIndex": 1,
+      "km": 20,
+      "runs": 2,
+      "committedAt": "2026-11-08T18:00:00Z"
+    },
+    {
+      "runnerId": "dan",
+      "weekIndex": 2,
+      "km": 20,
+      "runs": 2,
+      "committedAt": "2026-11-15T18:00:00Z"
+    },
+    {
+      "runnerId": "sam",
+      "weekIndex": 0,
+      "km": 20,
+      "runs": 3,
+      "committedAt": "2026-11-01T18:00:00Z"
+    },
+    {
+      "runnerId": "sam",
+      "weekIndex": 2,
+      "km": 16,
+      "runs": 2,
+      "committedAt": "2026-11-15T23:58:00Z"
+    },
+    {
+      "runnerId": "jo",
+      "weekIndex": 0,
+      "km": 8,
+      "runs": 2,
+      "committedAt": "2026-11-01T18:00:00Z"
+    },
+    {
+      "runnerId": "jo",
+      "weekIndex": 1,
+      "km": 10,
+      "runs": 3,
+      "committedAt": "2026-11-08T18:00:00Z"
+    },
+    {
+      "runnerId": "jo",
+      "weekIndex": 2,
+      "km": 9,
+      "runs": 3,
+      "committedAt": "2026-11-15T18:00:00Z"
+    }
+  ],
+  "bounties": [
+    {
+      "weekIndex": 0,
+      "title": "A run before 7am"
+    },
+    {
+      "weekIndex": 1,
+      "title": "A run with a crew mate"
+    },
+    {
+      "weekIndex": 2,
+      "title": "A new route"
+    }
+  ],
+  "activities": [
+    {
+      "id": "alex-01",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-03",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-03T19:30:00Z",
+      "bountyClaimed": true
+    },
+    {
+      "id": "alex-02",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-05",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-05T19:30:00Z"
+    },
+    {
+      "id": "alex-03",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-07",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-07T19:30:00Z"
+    },
+    {
+      "id": "alex-04",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-08",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-08T19:30:00Z"
+    },
+    {
+      "id": "alex-05",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-10",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-10T19:30:00Z"
+    },
+    {
+      "id": "alex-06",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-12",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-12T19:30:00Z"
+    },
+    {
+      "id": "alex-07",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-14",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-14T19:30:00Z"
+    },
+    {
+      "id": "alex-08",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-15",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-15T19:30:00Z"
+    },
+    {
+      "id": "alex-09",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-17",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-17T19:30:00Z"
+    },
+    {
+      "id": "alex-10",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-19",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-19T19:30:00Z"
+    },
+    {
+      "id": "alex-11",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-21",
+      "durationS": 2520,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-21T19:30:00Z"
+    },
+    {
+      "id": "alex-12",
+      "runnerId": "alex",
+      "source": "strava",
+      "runDate": "2026-11-22",
+      "durationS": 2362,
+      "distanceM": 7500,
+      "loggedAt": "2026-11-22T19:30:00Z"
+    },
+    {
+      "id": "priya-13",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-02",
+      "durationS": 1554,
+      "distanceM": 4200,
+      "loggedAt": "2026-11-02T19:30:00Z"
+    },
+    {
+      "id": "priya-14",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-04",
+      "durationS": 1628,
+      "distanceM": 4400,
+      "loggedAt": "2026-11-04T19:30:00Z"
+    },
+    {
+      "id": "priya-15",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-06",
+      "durationS": 1665,
+      "distanceM": 4500,
+      "loggedAt": "2026-11-06T19:30:00Z"
+    },
+    {
+      "id": "priya-16",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-08",
+      "durationS": 1665,
+      "distanceM": 4500,
+      "loggedAt": "2026-11-08T19:30:00Z"
+    },
+    {
+      "id": "priya-17",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-09",
+      "durationS": 1850,
+      "distanceM": 5000,
+      "loggedAt": "2026-11-09T19:30:00Z"
+    },
+    {
+      "id": "priya-18",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-11",
+      "durationS": 1850,
+      "distanceM": 5000,
+      "loggedAt": "2026-11-11T19:30:00Z"
+    },
+    {
+      "id": "priya-19",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-13",
+      "durationS": 1850,
+      "distanceM": 5000,
+      "loggedAt": "2026-11-13T19:30:00Z"
+    },
+    {
+      "id": "priya-20",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-14",
+      "durationS": 1924,
+      "distanceM": 5200,
+      "loggedAt": "2026-11-14T19:30:00Z",
+      "bountyClaimed": true
+    },
+    {
+      "id": "priya-21",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-16",
+      "durationS": 2035,
+      "distanceM": 5500,
+      "loggedAt": "2026-11-16T19:30:00Z"
+    },
+    {
+      "id": "priya-22",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-18",
+      "durationS": 1924,
+      "distanceM": 5200,
+      "loggedAt": "2026-11-18T19:30:00Z"
+    },
+    {
+      "id": "priya-23",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-20",
+      "durationS": 1961,
+      "distanceM": 5300,
+      "loggedAt": "2026-11-20T19:30:00Z"
+    },
+    {
+      "id": "priya-24",
+      "runnerId": "priya",
+      "source": "strava",
+      "runDate": "2026-11-21",
+      "durationS": 1850,
+      "distanceM": 5000,
+      "loggedAt": "2026-11-21T19:30:00Z",
+      "bountyClaimed": true
+    },
+    {
+      "id": "dan-25",
+      "runnerId": "dan",
+      "source": "strava",
+      "runDate": "2026-11-02",
+      "durationS": 2950,
+      "distanceM": 10000,
+      "loggedAt": "2026-11-02T19:30:00Z"
+    },
+    {
+      "id": "dan-26",
+      "runnerId": "dan",
+      "source": "strava",
+      "runDate": "2026-11-04",
+      "durationS": 2655,
+      "distanceM": 9000,
+      "loggedAt": "2026-11-04T19:30:00Z"
+    },
+    {
+      "id": "dan-27",
+      "runnerId": "dan",
+      "source": "strava",
+      "runDate": "2026-11-07",
+      "durationS": 2655,
+      "distanceM": 9000,
+      "loggedAt": "2026-11-07T19:30:00Z"
+    },
+    {
+      "id": "dan-28",
+      "runnerId": "dan",
+      "source": "strava",
+      "runDate": "2026-11-09",
+      "durationS": 3245,
+      "distanceM": 11000,
+      "loggedAt": "2026-11-09T19:30:00Z"
+    },
+    {
+      "id": "dan-29",
+      "runnerId": "dan",
+      "source": "strava",
+      "runDate": "2026-11-11",
+      "durationS": 2360,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-11T19:30:00Z"
+    },
+    {
+      "id": "dan-30",
+      "runnerId": "dan",
+      "source": "strava",
+      "runDate": "2026-11-14",
+      "durationS": 2655,
+      "distanceM": 9000,
+      "loggedAt": "2026-11-14T19:30:00Z",
+      "bountyClaimed": true
+    },
+    {
+      "id": "dan-31",
+      "runnerId": "dan",
+      "source": "strava",
+      "runDate": "2026-11-16",
+      "durationS": 3098,
+      "distanceM": 10500,
+      "loggedAt": "2026-11-16T19:30:00Z"
+    },
+    {
+      "id": "dan-32",
+      "runnerId": "dan",
+      "source": "strava",
+      "runDate": "2026-11-19",
+      "durationS": 2655,
+      "distanceM": 9000,
+      "loggedAt": "2026-11-19T19:30:00Z"
+    },
+    {
+      "id": "dan-33",
+      "runnerId": "dan",
+      "source": "strava",
+      "runDate": "2026-11-22",
+      "durationS": 2360,
+      "distanceM": 8000,
+      "loggedAt": "2026-11-22T19:30:00Z"
+    },
+    {
+      "id": "sam-34",
+      "runnerId": "sam",
+      "source": "manual",
+      "runDate": "2026-11-03",
+      "durationS": 2380,
+      "distanceM": 7000,
+      "loggedAt": "2026-11-03T21:00:00Z"
+    },
+    {
+      "id": "sam-35",
+      "runnerId": "sam",
+      "source": "manual",
+      "runDate": "2026-11-05",
+      "durationS": 2210,
+      "distanceM": 6500,
+      "loggedAt": "2026-11-05T21:00:00Z"
+    },
+    {
+      "id": "sam-36",
+      "runnerId": "sam",
+      "source": "manual",
+      "runDate": "2026-11-08",
+      "durationS": 2550,
+      "distanceM": 7500,
+      "loggedAt": "2026-11-08T21:00:00Z"
+    },
+    {
+      "id": "sam-37",
+      "runnerId": "sam",
+      "source": "manual",
+      "runDate": "2026-11-17",
+      "durationS": 2210,
+      "distanceM": 6500,
+      "loggedAt": "2026-11-17T21:00:00Z"
+    },
+    {
+      "id": "sam-38",
+      "runnerId": "sam",
+      "source": "manual",
+      "runDate": "2026-11-21",
+      "durationS": 2210,
+      "distanceM": 6500,
+      "loggedAt": "2026-11-21T21:00:00Z"
+    },
+    {
+      "id": "jo-39",
+      "runnerId": "jo",
+      "source": "manual",
+      "runDate": "2026-11-03",
+      "durationS": 1800,
+      "distanceM": 4000,
+      "loggedAt": "2026-11-03T21:00:00Z"
+    },
+    {
+      "id": "jo-40",
+      "runnerId": "jo",
+      "source": "manual",
+      "runDate": "2026-11-06",
+      "durationS": 1824,
+      "distanceM": 4100,
+      "loggedAt": "2026-11-06T21:00:00Z"
+    },
+    {
+      "id": "jo-41",
+      "runnerId": "jo",
+      "source": "manual",
+      "runDate": "2026-11-10",
+      "durationS": 1540,
+      "distanceM": 3500,
+      "loggedAt": "2026-11-10T21:00:00Z"
+    },
+    {
+      "id": "jo-42",
+      "runnerId": "jo",
+      "source": "manual",
+      "runDate": "2026-11-11",
+      "durationS": 660,
+      "distanceM": 1500,
+      "loggedAt": "2026-11-11T21:00:00Z"
+    },
+    {
+      "id": "jo-43",
+      "runnerId": "jo",
+      "source": "manual",
+      "runDate": "2026-11-12",
+      "durationS": 1522,
+      "distanceM": 3500,
+      "loggedAt": "2026-11-12T21:00:00Z"
+    },
+    {
+      "id": "jo-44",
+      "runnerId": "jo",
+      "source": "manual",
+      "runDate": "2026-11-14",
+      "durationS": 1462,
+      "distanceM": 3400,
+      "loggedAt": "2026-11-17T08:00:00Z"
+    },
+    {
+      "id": "jo-45",
+      "runnerId": "jo",
+      "source": "manual",
+      "runDate": "2026-11-17",
+      "durationS": 1360,
+      "distanceM": 3200,
+      "loggedAt": "2026-11-17T21:00:00Z"
+    },
+    {
+      "id": "jo-46",
+      "runnerId": "jo",
+      "source": "manual",
+      "runDate": "2026-11-19",
+      "durationS": 1386,
+      "distanceM": 3300,
+      "loggedAt": "2026-11-19T21:00:00Z",
+      "bountyClaimed": true
+    },
+    {
+      "id": "jo-47",
+      "runnerId": "jo",
+      "source": "manual",
+      "runDate": "2026-11-22",
+      "durationS": 1370,
+      "distanceM": 3300,
+      "loggedAt": "2026-11-22T21:00:00Z"
+    }
+  ],
+  "asOf": "2026-11-24T09:00:00Z"
+}

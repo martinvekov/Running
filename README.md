@@ -12,8 +12,10 @@ pnpm dev        # web app on http://localhost:3000
 pnpm test       # all tests
 pnpm typecheck
 pnpm lint
-pnpm sim fixtures/five-runners.json   # season simulator (milestone 2)
+pnpm sim fixtures/five-runners.json   # season simulator: markdown report
 ```
+
+The same fixture is published as a demo season at `/demo` on the web app.
 
 ## Layout
 
