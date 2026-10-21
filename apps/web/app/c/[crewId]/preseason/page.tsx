@@ -85,6 +85,7 @@ export default async function PreSeasonPage({
   const runCounts = new Map<string, number>();
   for (const a of activities) runCounts.set(a.runnerId, (runCounts.get(a.runnerId) ?? 0) + 1);
   const played = result.blocks.filter((b) => b.result).length;
+  const scored = result.totals.filter((t) => t.blocksPlayed > 0).length;
   const winner = result.totals[0];
   const { data: strava } = await supabase
     .from('strava_connections')
@@ -117,9 +118,17 @@ export default async function PreSeasonPage({
             <Label>Over {played} blocks of three weeks</Label>
             <Label className="dim">Points</Label>
           </div>
-          <p className="leadline">
-            <strong>{names.get(winner.runnerId)}</strong> won the last six months
-          </p>
+          {scored >= 2 ? (
+            <p className="leadline">
+              <strong>{names.get(winner.runnerId)}</strong> won the last six months
+            </p>
+          ) : (
+            <p className="note">
+              Only {names.get(winner.runnerId)} has enough runs so far, so this is one runner
+              against their own usual week. When friends connect Strava and import theirs, it
+              becomes a league.
+            </p>
+          )}
           <ol className="table">
             {result.totals.map((t) => (
               <li key={t.runnerId} className={t.rank === 1 ? 'leader' : undefined}>
@@ -145,8 +154,10 @@ export default async function PreSeasonPage({
             <Label>Nothing to score yet</Label>
           </div>
           <p className="note">
-            Import your Strava runs below. The look back needs at least two runners with a few weeks
-            of runs each.
+            No block could be scored. Each runner needs runs on at least two days in the four weeks
+            before a block starts. {activities.length}{' '}
+            {activities.length === 1 ? 'run is' : 'runs are'} saved for this crew in this period.
+            Import your Strava history below.
           </p>
         </section>
       )}

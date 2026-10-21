@@ -88,12 +88,12 @@ export function lookBack(input: LookBackInput): LookBackResult {
       const baseline = deriveBaseline(rules, input.activities, r.id, startDate);
       return baseline ? [{ id: r.id, name: r.name, ...baseline }] : [];
     });
-    if (entrants.length < 2) {
+    if (entrants.length < 1) {
       blocks.push({
         startDate,
         endDate,
         result: null,
-        skipped: 'Needs at least two runners with four weeks of history.',
+        skipped: 'Needs at least one runner with four weeks of history.',
       });
       continue;
     }
