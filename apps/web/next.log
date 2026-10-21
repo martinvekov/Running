@@ -1,0 +1,23 @@
+   ▲ Next.js 15.5.28
+   - Local:        http://localhost:3113
+   - Network:      http://192.0.2.2:3113
+
+ ✓ Starting...
+ ✓ Ready in 1242ms
+ ✓ Compiled /middleware in 267ms (174 modules)
+ ○ Compiling /sign-in ...
+ ✓ Compiled /sign-in in 1574ms (834 modules)
+ GET /sign-in 200 in 2076ms
+ ✓ Compiled / in 401ms (826 modules)
+ GET / 200 in 542ms
+ POST /sign-in 303 in 625ms
+ ○ Compiling /c/[crewId] ...
+ ✓ Compiled /c/[crewId] in 722ms (895 modules)
+ GET /c/22222222-2222-4222-8222-222222222222 200 in 2361ms
+ ✓ Compiled /c/[crewId]/standings in 408ms (897 modules)
+ GET /c/22222222-2222-4222-8222-222222222222/standings 200 in 1190ms
+ ✓ Compiled /c/[crewId]/run/[id] in 331ms (899 modules)
+ GET /c/22222222-2222-4222-8222-222222222222/run/00000000-0000-4000-8000-0000000000a1 200 in 1304ms
+ ✓ Compiled /c/[crewId]/log in 335ms (904 modules)
+ GET /c/22222222-2222-4222-8222-222222222222/log 200 in 1327ms
+[?25h
