@@ -1,9 +1,16 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { result, runnerName } from '../_lib/data';
-import { Avatar, PageTitle, StandingsList, WeekTabs } from '../_lib/ui';
+import { fixture, result, runnerName } from '../_lib/data';
+import { Label, Masthead, StandingsTable, WeekTabs } from '../_lib/ui';
 
-export const metadata: Metadata = { title: 'Leaderboard · Demo season · Crew Seasons' };
+export const metadata: Metadata = { title: 'Standings · Crew Seasons' };
+
+const SCORING = [
+  ['Show up', '5 per run, up to 4'],
+  ['Keep your word', '15, or 8 if close'],
+  ['Ambition', 'Up to +3'],
+  ['Duel', 'Win 10 · draw 5'],
+  ['Bounty', '5'],
+];
 
 export default function DemoStandingsPage() {
   const [leader, second] = result.standings;
@@ -11,54 +18,34 @@ export default function DemoStandingsPage() {
 
   return (
     <main className="page with-tabbar">
-      <PageTitle title="Leaderboard" chip="Demo" sub="Season 1 · three weeks" />
-
-      {leader && (
-        <Link href={`/demo/runner/${leader.runnerId}`} className="hero">
-          <div className="hero-copy">
-            <p className="eyebrow">{finished ? 'Season winner' : 'Leading'}</p>
-            <p className="hero-name display">{runnerName(leader.runnerId)}</p>
-            <p className="hero-points">{leader.points} points</p>
-            {second && (
-              <p className="muted small">
-                {leader.points - second.points} ahead of {runnerName(second.runnerId)}
-              </p>
-            )}
-          </div>
-          <Avatar id={leader.runnerId} size={88} />
-        </Link>
-      )}
-
+      <Masthead
+        kicker={fixture.crewName}
+        title="Standings"
+        meta={
+          leader && second
+            ? `${runnerName(leader.runnerId)} ${finished ? 'wins' : 'leads'} by ${leader.points - second.points} points`
+            : undefined
+        }
+      />
       <WeekTabs active="season" weeks={result.weeks.length} />
-      <StandingsList rows={result.standings} caption="Season standings" />
+      <StandingsTable rows={result.standings} title="Season 1" />
 
-      <section className="card">
-        <h2 className="card-title">How points work</h2>
-        <ul className="rules">
-          <li>
-            <span>Show up</span>
-            <span>5 per run · max 4</span>
-          </li>
-          <li>
-            <span>Keep your word</span>
-            <span>15 or 8</span>
-          </li>
-          <li>
-            <span>Ambition</span>
-            <span>up to +3</span>
-          </li>
-          <li>
-            <span>Duel</span>
-            <span>win 10 · draw 5</span>
-          </li>
-          <li>
-            <span>Bounty</span>
-            <span>5</span>
-          </li>
-        </ul>
-        <p className="muted small">
-          Commit to your runs and km by Sunday 23:59. You&apos;re scored against your own baseline,
-          so pace never matters and anyone can win. Running beyond your word earns nothing.
+      <section className="section">
+        <div className="section-head">
+          <Label>Scoring</Label>
+          <Label className="dim">Per week · max 53</Label>
+        </div>
+        <dl className="kv">
+          {SCORING.map(([k, v]) => (
+            <div key={k}>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="note">
+          Commit to your runs and km by Sunday 23:59. Everyone is scored against their own baseline,
+          so pace never counts. Running beyond your word earns nothing.
         </p>
       </section>
     </main>

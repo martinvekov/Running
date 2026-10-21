@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { result, runnerName } from '../../_lib/data';
+import { fixture, result, runnerName } from '../../_lib/data';
 import { formatDay, formatKm, formatShortDate } from '../../_lib/format';
-import { Avatar, PageTitle, Progress, StandingsList, WeekTabs } from '../../_lib/ui';
+import { Bar, Label, Masthead, Monogram, StandingsTable, WeekTabs } from '../../_lib/ui';
 
 export function generateStaticParams() {
   return result.weeks.map((w) => ({ week: String(w.weekIndex + 1) }));
@@ -15,7 +15,7 @@ export async function generateMetadata({
   params: Promise<{ week: string }>;
 }): Promise<Metadata> {
   const { week } = await params;
-  return { title: `Week ${week} · Demo season · Crew Seasons` };
+  return { title: `Week ${week} · Crew Seasons` };
 }
 
 export default async function DemoWeekPage({ params }: { params: Promise<{ week: string }> }) {
@@ -24,88 +24,84 @@ export default async function DemoWeekPage({ params }: { params: Promise<{ week:
   if (!week) notFound();
 
   const runners = [...week.runners].sort((a, b) => b.points - a.points);
+  const status =
+    week.status === 'closed' ? 'Final' : week.status === 'open' ? 'In progress' : 'Upcoming';
 
   return (
     <main className="page with-tabbar">
-      <PageTitle
+      <Masthead
+        kicker={fixture.crewName}
         title={`Week ${week.weekIndex + 1}`}
-        chip={week.status === 'closed' ? 'Final' : week.status === 'open' ? 'Live' : 'Soon'}
-        sub={`${formatShortDate(week.startDate)} – ${formatShortDate(week.endDate)} · duels, bounty and scores`}
+        meta={`${formatShortDate(week.startDate)} – ${formatShortDate(week.endDate)} · ${status}`}
       />
       <WeekTabs active={week.weekIndex + 1} weeks={result.weeks.length} />
 
       {week.bounty && (
-        <section className="card bounty">
-          <div>
-            <p className="eyebrow">Bounty · 5 points</p>
-            <p className="bounty-title">{week.bounty}</p>
+        <section className="section">
+          <div className="section-head">
+            <Label>Bounty</Label>
+            <Label className="dim">5 pts</Label>
           </div>
+          <p className="statement">{week.bounty}</p>
         </section>
       )}
 
-      <section className="card">
-        <h2 className="card-title">Duels</h2>
-        <div className="duels">
-          {week.duels.map((duel, i) => (
-            <div key={i} className="duel">
-              {duel.sides.map((side) => (
-                <Link
-                  key={side.runnerId}
-                  href={`/demo/runner/${side.runnerId}`}
-                  className="duel-side"
-                >
-                  <Avatar id={side.runnerId} size={32} />
-                  <div className="duel-body">
-                    <div className="duel-row">
-                      <strong>{runnerName(side.runnerId)}</strong>
-                      <span className={`pill ${side.outcome}`}>
-                        {side.outcome === 'none' ? '–' : `+${side.points}`}
-                      </span>
-                    </div>
-                    <Progress pct={side.kmPct} />
-                    <small className="muted">
-                      {side.completedOn
-                        ? `Hit 100% on ${formatDay(side.completedOn)}`
-                        : `${Math.round(side.kmPct)}% of committed km`}
-                    </small>
-                  </div>
-                </Link>
-              ))}
-              <p className="duel-summary">{duel.summary}</p>
-            </div>
-          ))}
+      <section className="section">
+        <div className="section-head">
+          <Label>Duels</Label>
+          <Label className="dim">First to 100% wins</Label>
         </div>
-      </section>
-
-      <section className="card">
-        <h2 className="card-title">Week scores</h2>
-        <ul className="week-scores">
-          {runners.map((rw) => (
-            <li key={rw.runnerId}>
-              <Link href={`/demo/runner/${rw.runnerId}`} className="week-score">
-                <Avatar id={rw.runnerId} size={32} />
-                <div className="week-score-body">
-                  <div className="duel-row">
-                    <strong>{runnerName(rw.runnerId)}</strong>
-                    <span className="points small-points display">
-                      {rw.points}
-                      <small>pts</small>
+        {week.duels.map((duel, i) => (
+          <div key={i} className="duel">
+            {duel.sides.map((side) => (
+              <Link key={side.runnerId} href={`/demo/runner/${side.runnerId}`} className="duel-row">
+                <Monogram id={side.runnerId} size={28} />
+                <div className="duel-main">
+                  <div className="spread">
+                    <span className="duel-name">{runnerName(side.runnerId)}</span>
+                    <span className={`duel-pts ${side.outcome}`}>
+                      {side.outcome === 'none' ? '–' : `+${side.points}`}
                     </span>
                   </div>
-                  <Progress pct={rw.kmPct} />
-                  <small className="muted">
+                  <Bar pct={side.kmPct} />
+                  <Label className="dim">
+                    {side.completedOn
+                      ? `100% on ${formatDay(side.completedOn)}`
+                      : `${Math.round(side.kmPct)}% of commitment`}
+                  </Label>
+                </div>
+              </Link>
+            ))}
+            <Label className="duel-result">{duel.summary.replace(/\.$/, '')}</Label>
+          </div>
+        ))}
+      </section>
+
+      <section className="section">
+        <div className="section-head">
+          <Label>Week points</Label>
+          <Label className="dim">Pts</Label>
+        </div>
+        <ol className="table">
+          {runners.map((rw, i) => (
+            <li key={rw.runnerId}>
+              <Link href={`/demo/runner/${rw.runnerId}`} className="row">
+                <span className="row-rank">{String(i + 1).padStart(2, '0')}</span>
+                <span className="row-name">
+                  {runnerName(rw.runnerId)}
+                  <Label className="dim">
                     {rw.runDays}/{rw.commitment.runs} runs · {formatKm(rw.km)} of{' '}
                     {formatKm(rw.commitment.km)}
-                    {rw.commitment.source === 'carried-over' ? ' · commitment carried over' : ''}
-                  </small>
-                </div>
+                  </Label>
+                </span>
+                <span className="row-num">{rw.points}</span>
               </Link>
             </li>
           ))}
-        </ul>
+        </ol>
       </section>
 
-      <StandingsList rows={week.standings} caption="Season standings after this week" />
+      <StandingsTable rows={week.standings} title="Season after this week" />
     </main>
   );
 }

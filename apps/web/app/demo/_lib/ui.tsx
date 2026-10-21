@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import type { StandingRow } from '@crew/engine';
 import { fixture, result, runnerName, runnersById } from './data';
 import { Kudos } from './client';
@@ -13,98 +14,108 @@ import {
 } from './format';
 import { demoKudos } from './social';
 
-export function Avatar({ id, size = 40, ring }: { id: string; size?: number; ring?: number }) {
+const ORDINALS = ['1st', '2nd', '3rd'];
+export const ordinal = (n: number) => ORDINALS[n - 1] ?? `${n}th`;
+export const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/** Small monospaced caps: the labelling voice of the whole app. */
+export function Label({ children, className }: { children: ReactNode; className?: string }) {
+  return <span className={className ? `label ${className}` : 'label'}>{children}</span>;
+}
+
+export function Monogram({ id, size = 32 }: { id: string; size?: number }) {
   const name = runnersById.get(id)?.name ?? id;
-  const avatar = (
+  return (
     <span
-      className="avatar"
-      style={{ width: size, height: size, fontSize: size * 0.38 }}
+      className="mono-avatar"
+      style={{ width: size, height: size, fontSize: size * 0.42 }}
       aria-hidden
     >
       {name.slice(0, 1)}
     </span>
   );
-  if (ring === undefined) return avatar;
-  const pct = Math.max(0, Math.min(100, ring));
-  return (
-    <span
-      className={pct >= 100 ? 'avatar-ring done' : 'avatar-ring'}
-      style={{ ['--pct' as string]: `${pct}%` }}
-    >
-      {avatar}
-    </span>
-  );
 }
 
 export function Movement({ value }: { value: number }) {
-  if (value > 0) return <span className="move up">▲ {value}</span>;
-  if (value < 0) return <span className="move down">▼ {-value}</span>;
-  return <span className="move flat">–</span>;
+  if (value > 0) return <span className="move up">+{value}</span>;
+  if (value < 0) return <span className="move down">−{-value}</span>;
+  return <span className="move" />;
 }
 
-export function Progress({ pct, from, label }: { pct: number; from?: number; label?: string }) {
+export function Bar({ pct, from, label }: { pct: number; from?: number; label?: string }) {
   const width = Math.max(0, Math.min(100, pct));
   const start = Math.max(0, Math.min(100, from ?? 0));
   return (
-    <div className="progress" role="img" aria-label={label ?? `${Math.round(pct)}%`}>
-      {from !== undefined && <div className="progress-prev" style={{ width: `${start}%` }} />}
-      <div className={`progress-fill${pct >= 100 ? ' done' : ''}`} style={{ width: `${width}%` }} />
+    <div className="bar" role="img" aria-label={label ?? `${Math.round(pct)}%`}>
+      <div className={pct >= 100 ? 'bar-fill done' : 'bar-fill'} style={{ width: `${width}%` }} />
+      {from !== undefined && <div className="bar-prev" style={{ width: `${start}%` }} />}
     </div>
   );
 }
 
-export function PageTitle({ title, sub, chip }: { title: string; sub?: string; chip?: string }) {
+export function Masthead({
+  kicker,
+  title,
+  meta,
+}: {
+  kicker: string;
+  title: string;
+  meta?: string | undefined;
+}) {
   return (
-    <header className="page-title">
-      <div className="page-title-row">
-        <h1 className="display">{title}</h1>
-        {chip && <span className="tag-outline">{chip}</span>}
+    <header className="masthead">
+      <div className="masthead-top">
+        <Label>{kicker}</Label>
+        <Label className="dim">Demo · fictional runners</Label>
       </div>
-      {sub && <p className="muted small">{sub}</p>}
+      <h1>{title}</h1>
+      {meta && <p className="masthead-meta">{meta}</p>}
     </header>
   );
 }
 
 export function WeekTabs({ active, weeks }: { active: 'season' | number; weeks: number }) {
   return (
-    <nav className="tabs" aria-label="Season or week">
-      <Link href="/demo/standings" className={active === 'season' ? 'tab active' : 'tab'}>
+    <nav className="seg" aria-label="Season or week">
+      <Link href="/demo/standings" className={active === 'season' ? 'seg-item active' : 'seg-item'}>
         Season
       </Link>
       {Array.from({ length: weeks }, (_, i) => (
         <Link
           key={i}
           href={`/demo/week/${i + 1}`}
-          className={active === i + 1 ? 'tab active' : 'tab'}
+          className={active === i + 1 ? 'seg-item active' : 'seg-item'}
         >
-          Wk {i + 1}
+          Week {i + 1}
         </Link>
       ))}
     </nav>
   );
 }
 
-export function StandingsList({ rows, caption }: { rows: StandingRow[]; caption?: string }) {
+export function StandingsTable({ rows, title }: { rows: StandingRow[]; title?: string }) {
   return (
-    <section className="card">
-      {caption && <h2 className="card-title">{caption}</h2>}
-      <ol className="standings">
+    <section className="section">
+      {title && (
+        <div className="section-head">
+          <Label>{title}</Label>
+          <Label className="dim">Pts</Label>
+        </div>
+      )}
+      <ol className="table">
         {rows.map((row) => (
-          <li key={row.runnerId}>
-            <Link href={`/demo/runner/${row.runnerId}`} className="standing">
-              <span className={`rank display rank-${row.rank}`}>{row.rank}</span>
-              <Avatar id={row.runnerId} />
-              <span className="standing-name">
-                <strong>{runnerName(row.runnerId)}</strong>
-                <small>
+          <li key={row.runnerId} className={row.rank === 1 ? 'leader' : undefined}>
+            <Link href={`/demo/runner/${row.runnerId}`} className="row">
+              <span className="row-rank">{pad2(row.rank)}</span>
+              <Monogram id={row.runnerId} />
+              <span className="row-name">
+                {runnerName(row.runnerId)}
+                <Label className="dim">
                   {row.duelWins} duel {row.duelWins === 1 ? 'win' : 'wins'}
-                </small>
+                </Label>
               </span>
               <Movement value={row.movement} />
-              <span className="points display">
-                {row.points}
-                <small>pts</small>
-              </span>
+              <span className="row-num">{row.points}</span>
             </Link>
           </li>
         ))}
@@ -113,37 +124,32 @@ export function StandingsList({ rows, caption }: { rows: StandingRow[]; caption?
   );
 }
 
-/** Crew row at the top of the feed: one ring per runner showing this week's km progress. */
-export function CrewRings() {
+/** This week's commitment progress for the whole crew, at the top of the feed. */
+export function CrewProgress() {
   const week = [...result.weeks].reverse().find((w) => w.status !== 'upcoming') ?? result.weeks[0]!;
   return (
-    <section className="crew-rings" aria-label={`Week ${week.weekIndex + 1} progress`}>
-      {fixture.runners.map((r) => {
-        const rw = week.runners.find((x) => x.runnerId === r.id)!;
-        return (
-          <Link key={r.id} href={`/demo/runner/${r.id}`} className="crew-ring">
-            <Avatar id={r.id} size={54} ring={rw.kmPct} />
-            <span>{r.name}</span>
-            <small className="muted">{Math.round(rw.kmPct)}%</small>
-          </Link>
-        );
-      })}
-    </section>
-  );
-}
-
-function FeedHead({ runnerId, when, extra }: { runnerId: string; when: string; extra?: string }) {
-  return (
-    <div className="feed-head">
-      <Avatar id={runnerId} size={38} />
-      <div className="feed-who">
-        <strong>{runnerName(runnerId)}</strong>
-        <small className="muted">
-          {when}
-          {extra ? ` · ${extra}` : ''}
-        </small>
+    <section className="section">
+      <div className="section-head">
+        <Label>Week {week.weekIndex + 1} · commitments</Label>
+        <Label className="dim">{week.status === 'closed' ? 'Final' : 'Live'}</Label>
       </div>
-    </div>
+      <ul className="progress-list">
+        {fixture.runners.map((r) => {
+          const rw = week.runners.find((x) => x.runnerId === r.id)!;
+          return (
+            <li key={r.id}>
+              <Link href={`/demo/runner/${r.id}`} className="progress-row">
+                <span className="progress-name">{r.name}</span>
+                <Bar pct={rw.kmPct} />
+                <span className={rw.kmPct >= 100 ? 'progress-pct done' : 'progress-pct'}>
+                  {Math.round(rw.kmPct)}%
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
@@ -152,184 +158,180 @@ function kudosFor(itemId: string, authorId?: string) {
   return { initial: k, names: k.by.map(runnerName) };
 }
 
-const ORDINALS = ['1st', '2nd', '3rd'];
-const ordinal = (n: number) => ORDINALS[n - 1] ?? `${n}th`;
+function ItemHead({ runnerId, right }: { runnerId: string; right: string }) {
+  return (
+    <div className="item-head">
+      <Monogram id={runnerId} size={28} />
+      <Link href={`/demo/runner/${runnerId}`} className="item-who">
+        {runnerName(runnerId)}
+      </Link>
+      <Label className="dim">{right}</Label>
+    </div>
+  );
+}
 
-export function RunPoster({ ctx, large = false }: { ctx: RunContext; large?: boolean }) {
+function runNote(ctx: RunContext): string {
+  if (ctx.runNumber === undefined) return RUN_STATUS[ctx.run.status]!.label;
+  return ctx.runNumber <= ctx.commitment.runs
+    ? `Run ${ctx.runNumber}/${ctx.commitment.runs}`
+    : `Run ${ctx.runNumber} · extra`;
+}
+
+/** Distance, time and pace for one run, as on the feed and the run page. */
+export function RunFigures({ ctx, size = 'feed' }: { ctx: RunContext; size?: 'feed' | 'hero' }) {
   const { run } = ctx;
   const status = RUN_STATUS[run.status]!;
   return (
-    <div className={large ? 'poster large' : 'poster'}>
-      <div className="poster-top">
-        <span className="poster-day">{formatDay(run.runDate)}</span>
-        <span className="poster-meta">
-          {run.bountyClaimed && <span className="meta-bounty">Bounty</span>}
-          <span className={`meta-source ${run.source}`}>
-            {run.source === 'strava' ? 'Strava' : 'Manual'}
-          </span>
-        </span>
-      </div>
-      <div className="poster-distance display">
+    <div className={`figures size-${size}`}>
+      <p className="figure-main">
         {(run.distanceM / 1000).toFixed(2)}
         <span>km</span>
-      </div>
-      <dl className="poster-stats">
+      </p>
+      <dl className="figure-grid">
         <div>
           <dt>Time</dt>
           <dd>{formatDuration(run.durationS)}</dd>
         </div>
         <div>
-          <dt>Pace</dt>
-          <dd>{formatPace(run.durationS, run.distanceM)}</dd>
+          <dt>Pace /km</dt>
+          <dd>{formatPace(run.durationS, run.distanceM).replace(' /km', '')}</dd>
         </div>
         <div>
-          <dt>Status</dt>
-          <dd className={`status-${status.tone}`}>{status.label}</dd>
+          <dt>Week {ctx.weekIndex + 1}</dt>
+          <dd className={status.tone === 'warn' ? 'warn' : undefined}>{runNote(ctx)}</dd>
         </div>
       </dl>
     </div>
   );
 }
 
-function RunCard({ item }: { item: Extract<FeedItem, { kind: 'run' }> }) {
+function RunItem({ item }: { item: Extract<FeedItem, { kind: 'run' }> }) {
   const { ctx } = item;
   const counts = ctx.run.status === 'counted' || ctx.run.status === 'km-only';
   return (
-    <article className="feed-card">
-      <FeedHead
-        runnerId={ctx.runnerId}
-        when={`Week ${ctx.weekIndex + 1}`}
-        extra={
-          ctx.runNumber !== undefined
-            ? ctx.runNumber <= ctx.commitment.runs
-              ? `run ${ctx.runNumber} of ${ctx.commitment.runs}`
-              : `run ${ctx.runNumber}, beyond their ${ctx.commitment.runs}`
-            : RUN_STATUS[ctx.run.status]!.label.toLowerCase()
-        }
-      />
-      <Link href={`/demo/run/${ctx.run.activityId}`} className="feed-body">
-        <RunPoster ctx={ctx} />
+    <article className="item">
+      <ItemHead runnerId={ctx.runnerId} right={formatDay(ctx.run.runDate)} />
+      <Link href={`/demo/run/${ctx.run.activityId}`} className="item-body">
+        <RunFigures ctx={ctx} />
       </Link>
       {counts && (
-        <div className="feed-progress">
-          <div className="duel-row small">
-            <span className="muted">
-              {ctx.completedCommitment
-                ? `Commitment complete · ${formatKm(ctx.commitment.km)}`
-                : `${Math.round(ctx.pctAfter)}% of ${formatKm(ctx.commitment.km)} this week`}
-            </span>
-            <span className="muted">
-              {Math.round(ctx.pctBefore)}% → {Math.round(ctx.pctAfter)}%
-            </span>
+        <div className="item-progress">
+          <Bar pct={ctx.pctAfter} from={ctx.pctBefore} />
+          <div className="spread">
+            <Label className="dim">
+              {Math.round(ctx.pctBefore)} → {Math.round(ctx.pctAfter)}% of{' '}
+              {formatKm(ctx.commitment.km)}
+            </Label>
+            {ctx.completedCommitment && <Label className="tick">Commitment kept</Label>}
           </div>
-          <Progress pct={ctx.pctAfter} from={ctx.pctBefore} />
         </div>
       )}
-      <Kudos {...kudosFor(item.id, ctx.runnerId)} />
+      <div className="item-foot">
+        <Kudos {...kudosFor(item.id, ctx.runnerId)} />
+        <span className="item-tags">
+          {ctx.run.bountyClaimed && <Label className="tag-bounty">Bounty</Label>}
+          <Label className={`src ${ctx.run.source}`}>
+            {ctx.run.source === 'strava' ? 'Strava' : 'Manual'}
+          </Label>
+        </span>
+      </div>
     </article>
   );
 }
 
-function CommitCard({ item }: { item: Extract<FeedItem, { kind: 'commit' }> }) {
+function CommitItem({ item }: { item: Extract<FeedItem, { kind: 'commit' }> }) {
   const runner = runnersById.get(item.runnerId)!;
   const above = Math.round((item.km / runner.baselineKm - 1) * 100);
   return (
-    <article className="feed-card compact">
-      <FeedHead runnerId={item.runnerId} when={formatDay(item.at.slice(0, 10))} />
-      <div className="feed-statement">
-        <span className="muted small">Commitment for week {item.weekIndex + 1}</span>
-        <strong className="display">
-          {item.runs} runs · {item.km} km
-        </strong>
+    <article className="item">
+      <ItemHead runnerId={item.runnerId} right={formatDay(item.at.slice(0, 10))} />
+      <div className="commit">
+        <Label className="dim">Commits to week {item.weekIndex + 1}</Label>
+        <p className="commit-figures">
+          {item.runs}
+          <span>runs</span>
+          {item.km}
+          <span>km</span>
+        </p>
         {above !== 0 && (
-          <span className="muted small">
-            {above > 0 ? `${above}% above` : `${-above}% below`} their usual week
-          </span>
+          <Label className={above > 0 ? 'tick' : 'dim'}>
+            {above > 0 ? `+${above}` : above}% vs usual week
+          </Label>
         )}
       </div>
-      <Kudos {...kudosFor(item.id, item.runnerId)} />
+      <div className="item-foot">
+        <Kudos {...kudosFor(item.id, item.runnerId)} />
+      </div>
     </article>
   );
 }
 
-function OvertakeCard({ item }: { item: Extract<FeedItem, { kind: 'overtake' }> }) {
-  const passed = item.passed.map(runnerName);
+function OvertakeItem({ item }: { item: Extract<FeedItem, { kind: 'overtake' }> }) {
   return (
-    <article className="feed-card">
-      <Link href={`/demo/run/${item.activityId}`} className="overtake-body">
-        <span className="overtake-icon" aria-hidden>
-          <svg viewBox="0 0 24 24" width="18" height="18">
-            <path
-              d="M12 19V5M5.5 11.5 12 5l6.5 6.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-        <div>
-          <p className="overtake-line">
-            {runnerName(item.runnerId)} moves up to {ordinal(item.rank)}
-          </p>
-          <p className="muted small">Passed {passed.join(' and ')} in the season standings</p>
-        </div>
+    <article className="item band">
+      <Link href={`/demo/run/${item.activityId}`} className="band-body">
+        <Label className="tick">Overtake</Label>
+        <p className="band-line">
+          {runnerName(item.runnerId)} moves to {ordinal(item.rank)}
+        </p>
+        <Label className="dim">Passing {item.passed.map(runnerName).join(' and ')}</Label>
       </Link>
-      <Kudos {...kudosFor(item.id)} />
     </article>
   );
 }
 
-function WeekCard({ item }: { item: Extract<FeedItem, { kind: 'week' }> }) {
+function WeekItem({ item }: { item: Extract<FeedItem, { kind: 'week' }> }) {
   const week = result.weeks[item.weekIndex]!;
   const top = [...week.runners].sort((a, b) => b.points - a.points).slice(0, 3);
   return (
-    <article className="feed-card">
-      <Link href={`/demo/week/${item.weekIndex + 1}`} className="week-wrap-body">
-        <div className="duel-row">
-          <strong>Week {item.weekIndex + 1} results</strong>
-          <span className="muted small">
+    <article className="item">
+      <Link href={`/demo/week/${item.weekIndex + 1}`} className="item-body">
+        <div className="spread">
+          <Label>Week {item.weekIndex + 1} · final</Label>
+          <Label className="dim">
             {formatShortDate(week.startDate)} – {formatShortDate(week.endDate)}
-          </span>
+          </Label>
         </div>
-        <ol className="podium">
+        <ol className="mini-table">
           {top.map((rw, i) => (
             <li key={rw.runnerId}>
-              <span className="podium-rank">{i + 1}</span>
-              <Avatar id={rw.runnerId} size={28} />
+              <span className="row-rank">{pad2(i + 1)}</span>
               <span>{runnerName(rw.runnerId)}</span>
-              <span className="podium-pts">{rw.points} pts</span>
+              <span className="row-num">{rw.points}</span>
             </li>
           ))}
         </ol>
-        <ul className="wrap-duels">
+        <ul className="duel-lines">
           {week.duels.map((d, i) => (
             <li key={i}>
-              {d.sides.map((side) => runnerName(side.runnerId)).join(', ')}: {d.summary}
+              <Label className="dim">
+                {d.sides.map((s) => runnerName(s.runnerId)).join(' / ')}
+              </Label>
+              <Label>{d.summary.replace(/\.$/, '')}</Label>
             </li>
           ))}
         </ul>
-        <span className="link-more">View week</span>
       </Link>
-      <Kudos {...kudosFor(item.id)} />
+      <div className="item-foot">
+        <Kudos {...kudosFor(item.id)} />
+      </div>
     </article>
   );
 }
 
-export function FeedList({ items }: { items: FeedItem[] }) {
+export function Feed({ items }: { items: FeedItem[] }) {
   return (
     <div className="feed">
       {items.map((item) => {
         switch (item.kind) {
           case 'run':
-            return <RunCard key={item.id} item={item} />;
+            return <RunItem key={item.id} item={item} />;
           case 'commit':
-            return <CommitCard key={item.id} item={item} />;
+            return <CommitItem key={item.id} item={item} />;
           case 'overtake':
-            return <OvertakeCard key={item.id} item={item} />;
+            return <OvertakeItem key={item.id} item={item} />;
           case 'week':
-            return <WeekCard key={item.id} item={item} />;
+            return <WeekItem key={item.id} item={item} />;
         }
       })}
     </div>

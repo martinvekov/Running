@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { result, runnerName, runnersById } from '../../_lib/data';
-import { runContexts, weekDays } from '../../_lib/feed';
+import { runContexts, weekDays, type RunContext } from '../../_lib/feed';
 import { formatDay, formatKm } from '../../_lib/format';
 import { Kudos } from '../../_lib/client';
 import { demoKudos } from '../../_lib/social';
-import { Avatar, Progress, RunPoster } from '../../_lib/ui';
+import { Bar, Label, Monogram, RunFigures } from '../../_lib/ui';
 
 export function generateStaticParams() {
   return [...runContexts.keys()].map((id) => ({ id }));
@@ -24,22 +24,20 @@ export async function generateMetadata({
   };
 }
 
-function countedFor(ctx: NonNullable<ReturnType<typeof runContexts.get>>): string[] {
-  const { run, commitment } = ctx;
-  switch (run.status) {
+function counted(ctx: RunContext): [string, string] {
+  switch (ctx.run.status) {
     case 'too-short':
-      return ['Too short to count: a run needs 15 minutes or 2 km.'];
+      return ['Not counted', 'Under 15 minutes and 2 km'];
     case 'logged-late':
-      return [
-        'Arrived too late to count: runs must be in by 23:59 two days after, and before Monday 12:00.',
-      ];
+      return ['Not counted', 'Logged after the window closed'];
     case 'km-only':
-      return ['Second run that day: the km count, but only one run per day counts as a run.'];
+      return ['Km only', 'Second run that day'];
     case 'counted':
       return [
-        ctx.runNumber! <= commitment.runs
-          ? `Run ${ctx.runNumber} of ${commitment.runs} committed this week.`
-          : `Run ${ctx.runNumber}: beyond the ${commitment.runs} committed.`,
+        'Counted',
+        ctx.runNumber! <= ctx.commitment.runs
+          ? `Run ${ctx.runNumber} of ${ctx.commitment.runs} committed`
+          : `Run ${ctx.runNumber}, beyond the ${ctx.commitment.runs} committed`,
       ];
   }
 }
@@ -58,89 +56,98 @@ export default async function DemoRunPage({ params }: { params: Promise<{ id: st
   const maxKm = Math.max(...days.map((d) => d.km), 1);
   const qualifies = ctx.run.status === 'counted' || ctx.run.status === 'km-only';
   const kudos = demoKudos(`run-${id}`, ctx.runnerId);
+  const [statusTitle, statusDetail] = counted(ctx);
 
   return (
     <main className="page with-tabbar">
-      <div className="run-topbar">
+      <div className="spread">
         <Link href="/demo" className="back">
-          ← Feed
+          <Label>← Feed</Label>
         </Link>
-        <Link href={`/demo/runner/${runner.id}`} className="run-owner">
-          <Avatar id={runner.id} size={28} />
-          <strong>{runner.name}</strong>
-        </Link>
+        <Label className="dim">{ctx.run.source === 'strava' ? 'Strava' : 'Manual entry'}</Label>
       </div>
 
-      <RunPoster ctx={ctx} large />
-      <Kudos initial={kudos} names={kudos.by.map(runnerName)} />
+      <header className="run-head">
+        <Link href={`/demo/runner/${runner.id}`} className="item-head">
+          <Monogram id={runner.id} size={28} />
+          <span className="item-who">{runner.name}</span>
+          <Label className="dim">{formatDay(ctx.run.runDate)}</Label>
+        </Link>
+        <RunFigures ctx={ctx} size="hero" />
+        <Kudos initial={kudos} names={kudos.by.map(runnerName)} />
+      </header>
 
-      <section className="card">
-        <h2 className="card-title">What it counted for</h2>
-        <ul className="counted-for">
-          {countedFor(ctx).map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-          {ctx.run.bountyClaimed && <li>Claimed the bounty: “{week.bounty}”.</li>}
-        </ul>
-        {qualifies && (
-          <div className="commitment">
-            <div className="duel-row small">
-              <span className="muted">
-                Week {ctx.weekIndex + 1} word: {rw.commitment.runs} runs ·{' '}
+      <section className="section">
+        <div className="section-head">
+          <Label>Counted for</Label>
+          <Label className={qualifies ? 'tick' : 'warn'}>{statusTitle}</Label>
+        </div>
+        <dl className="kv">
+          <div>
+            <dt>Status</dt>
+            <dd>{statusDetail}</dd>
+          </div>
+          {qualifies && (
+            <div>
+              <dt>Commitment</dt>
+              <dd>
+                {Math.round(ctx.pctBefore)}% → {Math.round(ctx.pctAfter)}% of{' '}
                 {formatKm(rw.commitment.km)}
-              </span>
-              <span>
-                {Math.round(ctx.pctBefore)}% → <strong>{Math.round(ctx.pctAfter)}%</strong>
-              </span>
+              </dd>
             </div>
-            <Progress pct={ctx.pctAfter} from={ctx.pctBefore} />
-            {ctx.completedCommitment && (
-              <p className="finish-line">
-                This run completed the commitment
-                {mySide?.completedOn
-                  ? `, setting the duel finish on ${formatDay(mySide.completedOn)}`
-                  : ''}
-                .
-              </p>
-            )}
-          </div>
-        )}
+          )}
+          {ctx.completedCommitment && mySide?.completedOn && (
+            <div>
+              <dt>Duel</dt>
+              <dd>Finish set on {formatDay(mySide.completedOn)}</dd>
+            </div>
+          )}
+          {ctx.run.bountyClaimed && (
+            <div>
+              <dt>Bounty</dt>
+              <dd>{week.bounty}</dd>
+            </div>
+          )}
+        </dl>
+        {qualifies && <Bar pct={ctx.pctAfter} from={ctx.pctBefore} />}
       </section>
 
-      <section className="card">
-        <h2 className="card-title">Week {ctx.weekIndex + 1} at a glance</h2>
-        <div className="week-bars">
+      <section className="section">
+        <div className="section-head">
+          <Label>Week {ctx.weekIndex + 1}</Label>
+          <Label className="dim">
+            {rw.runDays} runs · {formatKm(rw.km)}
+          </Label>
+        </div>
+        <div className="week-chart">
           {days.map((d) => (
-            <div key={d.date} className={d.date === ctx.run.runDate ? 'bar this' : 'bar'}>
-              <div className="bar-track">
-                <div className="bar-fill" style={{ height: `${(d.km / maxKm) * 100}%` }} />
+            <div key={d.date} className={d.date === ctx.run.runDate ? 'col this' : 'col'}>
+              <div className="col-track">
+                <div className="col-fill" style={{ height: `${(d.km / maxKm) * 100}%` }} />
               </div>
-              <small>{formatDay(d.date).slice(0, 1)}</small>
+              <Label className="dim">{formatDay(d.date).slice(0, 2)}</Label>
             </div>
           ))}
         </div>
-        <div className="duel-row small">
-          <span className="muted">
-            {rw.runDays} runs · {formatKm(rw.km)}
-          </span>
-          <Link href={`/demo/runner/${runner.id}`} className="link-more">
-            {runner.name}&apos;s season →
-          </Link>
-        </div>
       </section>
 
-      {duel && mySide && (
-        <Link href={`/demo/week/${ctx.weekIndex + 1}`} className="card duel-teaser">
-          <span className="eyebrow">Week {ctx.weekIndex + 1} duel</span>
-          <div className="duel-teaser-row">
-            {duel.sides.map((s) => (
-              <span key={s.runnerId} className="duel-teaser-side">
-                <Avatar id={s.runnerId} size={34} />
-                <span className="display duel-pct">{Math.round(s.kmPct)}%</span>
-              </span>
-            ))}
+      {duel && (
+        <Link href={`/demo/week/${ctx.weekIndex + 1}`} className="section">
+          <div className="section-head">
+            <Label>Duel</Label>
+            <Label>{duel.summary.replace(/\.$/, '')}</Label>
           </div>
-          <p className="muted small">{duel.summary}</p>
+          <ul className="progress-list">
+            {duel.sides.map((s) => (
+              <li key={s.runnerId} className="progress-row">
+                <span className="progress-name">{runnerName(s.runnerId)}</span>
+                <Bar pct={s.kmPct} />
+                <span className={s.kmPct >= 100 ? 'progress-pct done' : 'progress-pct'}>
+                  {Math.round(s.kmPct)}%
+                </span>
+              </li>
+            ))}
+          </ul>
         </Link>
       )}
     </main>

@@ -3,18 +3,20 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <main className="page landing">
-      <p className="eyebrow">Crew Seasons</p>
-      <h1 className="display">
-        Three weeks. Your crew.
+      <span className="label">Crew Seasons</span>
+      <h1>
+        Three weeks.
+        <br />
+        Your crew.
         <br />
         Anyone can win.
       </h1>
-      <p className="muted">
-        Commit to your runs every Sunday, keep your word, win your duel. Everyone is scored against
-        their own baseline, so pace never matters.
+      <p className="note">
+        Commit to your runs every Sunday. Keep your word, win your duel. Everyone is scored against
+        their own baseline, so pace never counts.
       </p>
       <Link href="/demo" className="cta">
-        See the demo season
+        View the demo season
       </Link>
     </main>
   );

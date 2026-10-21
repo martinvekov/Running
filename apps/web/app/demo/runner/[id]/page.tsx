@@ -11,7 +11,7 @@ import {
   RULE_LABELS,
   RUN_STATUS,
 } from '../../_lib/format';
-import { Avatar, Progress } from '../../_lib/ui';
+import { Bar, Label, ordinal } from '../../_lib/ui';
 
 export function generateStaticParams() {
   return fixture.runners.map((r) => ({ id: r.id }));
@@ -23,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  return { title: `${runnersById.get(id)?.name ?? 'Runner'} · Demo season · Crew Seasons` };
+  return { title: `${runnersById.get(id)?.name ?? 'Runner'} · Crew Seasons` };
 }
 
 export default async function DemoRunnerPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,126 +36,110 @@ export default async function DemoRunnerPage({ params }: { params: Promise<{ id:
     week: w,
     rw: w.runners.find((r) => r.runnerId === id)!,
   }));
-  const allRuns = weeks.flatMap(({ rw }) => rw.runs);
-  const counted = allRuns.filter((r) => r.status === 'counted' || r.status === 'km-only');
+  const counted = weeks
+    .flatMap(({ rw }) => rw.runs)
+    .filter((r) => r.status === 'counted' || r.status === 'km-only');
   const totalKm = counted.reduce((s, r) => s + r.distanceM, 0) / 1000;
   const totalS = counted.reduce((s, r) => s + r.durationS, 0);
 
   return (
     <main className="page with-tabbar">
       <Link href="/demo/standings" className="back">
-        ← Leaderboard
+        <Label>← Standings</Label>
       </Link>
 
-      <header className="profile">
-        <Avatar id={id} size={72} />
-        <div>
-          <h1 className="display">{runner.name}</h1>
-          <p className="muted">{runner.persona}</p>
-          <p className="muted small">
-            Baseline {runner.baselineKm} km · {runner.baselineRuns} runs a week
-          </p>
+      <header className="masthead">
+        <div className="masthead-top">
+          <Label>{runner.persona}</Label>
+          <Label className="dim">
+            Usual week {runner.baselineKm} km · {runner.baselineRuns} runs
+          </Label>
         </div>
-        <div className="profile-points">
-          <span className="rank-badge">#{standing.rank}</span>
-          <strong className="display">{standing.points}</strong>
-          <small>pts</small>
-        </div>
+        <h1>{runner.name}</h1>
+        <p className="masthead-meta">
+          {ordinal(standing.rank)} · {standing.points} points
+        </p>
       </header>
 
-      <section className="stats display-stats">
+      <dl className="stat-strip">
         <div>
-          <strong>{totalKm.toFixed(1)}</strong>
-          <small>Season km</small>
+          <dt>Km</dt>
+          <dd>{totalKm.toFixed(1)}</dd>
         </div>
         <div>
-          <strong>{counted.length}</strong>
-          <small>Runs</small>
+          <dt>Runs</dt>
+          <dd>{counted.length}</dd>
         </div>
         <div>
-          <strong>{formatPace(totalS, totalKm * 1000).replace(' /km', '')}</strong>
-          <small>Pace /km</small>
+          <dt>Pace</dt>
+          <dd>{formatPace(totalS, totalKm * 1000).replace(' /km', '')}</dd>
         </div>
         <div>
-          <strong>{standing.duelWins}</strong>
-          <small>Duel wins</small>
+          <dt>Duels</dt>
+          <dd>{standing.duelWins}</dd>
         </div>
-      </section>
+      </dl>
 
       {weeks.map(({ week, rw }) => (
-        <section key={week.weekIndex} className="card">
-          <div className="week-head">
-            <h2 className="card-title">
-              Week {week.weekIndex + 1}
-              <small>
-                {formatShortDate(week.startDate)} – {formatShortDate(week.endDate)}
-              </small>
-            </h2>
-            <span className="points display">
-              {rw.points}
-              <small>pts</small>
-            </span>
+        <section key={week.weekIndex} className="section">
+          <div className="section-head">
+            <Label>
+              Week {week.weekIndex + 1} · {formatShortDate(week.startDate)} –{' '}
+              {formatShortDate(week.endDate)}
+            </Label>
+            <span className="section-num">{rw.points}</span>
           </div>
 
-          <div className="commitment">
-            <div className="duel-row">
-              <span className="muted small">
+          <div className="commit-line">
+            <div className="spread">
+              <Label className="dim">
                 Committed {rw.commitment.runs} runs · {formatKm(rw.commitment.km)}
                 {rw.commitment.source === 'carried-over'
-                  ? ' (carried over)'
+                  ? ' · carried over'
                   : rw.commitment.source === 'baseline'
-                    ? ' (baseline)'
+                    ? ' · baseline'
                     : ''}
-              </span>
-              <span className="small">{Math.round(rw.kmPct)}%</span>
+              </Label>
+              <Label className={rw.kmPct >= 100 ? 'tick' : 'dim'}>{Math.round(rw.kmPct)}%</Label>
             </div>
-            <Progress pct={rw.kmPct} />
+            <Bar pct={rw.kmPct} />
           </div>
 
-          <ul className="lines">
+          <ul className="breakdown">
             {rw.lines.map((line) => (
               <li key={line.rule}>
                 <div>
-                  <strong>{RULE_LABELS[line.rule]}</strong>
-                  <p className="muted small">{line.reason}</p>
+                  <span className="breakdown-rule">{RULE_LABELS[line.rule]}</span>
+                  <p>{line.reason}</p>
                 </div>
-                <span className={line.points ? 'line-pts' : 'line-pts zero'}>+{line.points}</span>
+                <span className={line.points ? 'breakdown-pts' : 'breakdown-pts zero'}>
+                  {line.points ? `+${line.points}` : '0'}
+                </span>
               </li>
             ))}
           </ul>
 
-          {rw.runs.length > 0 ? (
-            <ul className="runs">
+          {rw.runs.length > 0 && (
+            <ul className="run-list">
               {rw.runs.map((run) => {
                 const status = RUN_STATUS[run.status]!;
                 return (
                   <li key={run.activityId}>
-                    <Link href={`/demo/run/${run.activityId}`} className="run">
-                      <div className="run-date">
-                        <strong>{formatDay(run.runDate).split(' ')[0]}</strong>
-                        <small>{formatShortDate(run.runDate)}</small>
-                      </div>
-                      <div className="run-main">
-                        <strong>{formatKm(run.distanceM / 1000)}</strong>
-                        <small className="muted">
-                          {formatDuration(run.durationS)} ·{' '}
-                          {formatPace(run.durationS, run.distanceM)}
-                        </small>
-                      </div>
-                      <div className="run-tags">
-                        <span className={`chip ${status.tone}`}>{status.label}</span>
-                        <span className={`chip source ${run.source}`}>
-                          {run.source === 'strava' ? 'Strava' : 'Manual'}
-                        </span>
-                        {run.bountyClaimed && <span className="chip bounty-chip">Bounty</span>}
-                      </div>
+                    <Link href={`/demo/run/${run.activityId}`} className="run-row">
+                      <Label className="dim run-day">{formatDay(run.runDate)}</Label>
+                      <span className="run-km">{(run.distanceM / 1000).toFixed(2)}</span>
+                      <Label className="dim">
+                        {formatDuration(run.durationS)} ·{' '}
+                        {formatPace(run.durationS, run.distanceM).replace(' /km', '')}
+                      </Label>
+                      <Label className={status.tone === 'warn' ? 'warn' : 'dim'}>
+                        {run.bountyClaimed ? 'Bounty' : status.tone === 'ok' ? '' : status.label}
+                      </Label>
                     </Link>
                   </li>
                 );
               })}
             </ul>
-          ) : (
-            <p className="muted small empty">No runs this week.</p>
           )}
         </section>
       ))}

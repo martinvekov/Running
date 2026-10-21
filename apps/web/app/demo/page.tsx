@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import { fixture, result } from './_lib/data';
 import { feed } from './_lib/feed';
 import { formatShortDate } from './_lib/format';
-import { CrewRings, FeedList, PageTitle } from './_lib/ui';
+import { CrewProgress, Feed, Masthead } from './_lib/ui';
 
 export const metadata: Metadata = {
-  title: 'Feed · Demo season · Crew Seasons',
+  title: 'Feed · Crew Seasons',
   description: 'Five fictional runners, one three-week season, scored by the real engine.',
 };
 
@@ -14,17 +14,13 @@ export default function DemoFeedPage() {
   const last = result.weeks.at(-1)!;
   return (
     <main className="page with-tabbar">
-      <PageTitle
+      <Masthead
+        kicker={fixture.crewName}
         title="Feed"
-        chip="Demo"
-        sub={`${fixture.crewName} · Season 1 · ${formatShortDate(first.startDate)} – ${formatShortDate(last.endDate)}`}
+        meta={`Season 1 · ${formatShortDate(first.startDate)} – ${formatShortDate(last.endDate)}`}
       />
-      <CrewRings />
-      <FeedList items={feed} />
-      <p className="footnote">
-        Fictional runners and reactions. Every point comes from the same engine the real app will
-        use.
-      </p>
+      <CrewProgress />
+      <Feed items={feed} />
     </main>
   );
 }
