@@ -448,10 +448,17 @@ function ItemHead({
   return (
     <div className="item-head">
       <Monogram name={view.runnerName(runnerId)} size={32} />
-      <Link href={`${view.base}/runner/${runnerId}`} className="item-who">
-        {runnerName(runnerId)}
-        <small>{right}</small>
-      </Link>
+      {view.runnersById.has(runnerId) ? (
+        <Link href={`${view.base}/runner/${runnerId}`} className="item-who">
+          {runnerName(runnerId)}
+          <small>{right}</small>
+        </Link>
+      ) : (
+        <span className="item-who">
+          {runnerName(runnerId)}
+          <small>{right}</small>
+        </span>
+      )}
       {badge}
     </div>
   );
@@ -652,11 +659,67 @@ function WeekItem({ view, item }: { view: SeasonView; item: Extract<FeedItem, { 
   );
 }
 
+function PastRunItem({
+  view,
+  item,
+}: {
+  view: SeasonView;
+  item: Extract<FeedItem, { kind: 'past' }>;
+}) {
+  const start = view.input.season.startDate;
+  const figures = (
+    <div className="figures size-feed">
+      <div className="figures-top">
+        <span className="figures-tags">
+          <span className="glass">{item.source === 'strava' ? 'Strava' : 'Manual'}</span>
+        </span>
+      </div>
+      <p className="figure-main">
+        {(item.distanceM / 1000).toFixed(2)}
+        <span>km</span>
+      </p>
+      <dl className="figure-grid">
+        <div>
+          <dt>Time</dt>
+          <dd>{formatDuration(item.durationS)}</dd>
+        </div>
+        <div>
+          <dt>Pace</dt>
+          <dd>{formatPace(item.durationS, item.distanceM).replace(' /km', '/km')}</dd>
+        </div>
+        <div>
+          <dt>Run</dt>
+          <dd>{item.runDate < start ? 'Pre-season' : 'Post-season'}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+  return (
+    <article className="item">
+      <ItemHead
+        view={view}
+        runnerId={item.runnerId}
+        right={formatDay(item.runDate)}
+        badge={<span className="pts-badge zero">Not scored</span>}
+      />
+      {item.linkUrl ? (
+        <a href={item.linkUrl} target="_blank" rel="noopener noreferrer" className="item-body">
+          {figures}
+        </a>
+      ) : (
+        <div className="item-body">{figures}</div>
+      )}
+    </article>
+  );
+}
+
 export function Feed({ view }: { view: SeasonView }) {
   return (
     <div className="feed">
       {view.feed.map((item) => {
         switch (item.kind) {
+          case 'past':
+            return <PastRunItem key={item.id} view={view} item={item} />;
           case 'run':
             return <RunItem key={item.id} view={view} item={item} />;
           case 'commit':
