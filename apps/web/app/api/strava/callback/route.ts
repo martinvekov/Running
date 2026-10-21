@@ -9,9 +9,10 @@ export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const state = params.get('state') ?? '';
   const expected = request.cookies.get('strava_state')?.value;
-  const crewId = state.split('.')[1] ?? '';
+  const [, crewId = '', target = 'log'] = state.split('.');
+  const page = target === 'preseason' ? 'preseason' : 'log';
   const back = (query: string) =>
-    NextResponse.redirect(new URL(`/c/${crewId}/log?${query}`, request.url));
+    NextResponse.redirect(new URL(`/c/${crewId}/${page}?${query}`, request.url));
 
   if (!expected || state !== expected) return back('error=strava');
   const { user, season } = await getCrewContext(crewId);

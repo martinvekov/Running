@@ -86,13 +86,14 @@ async function importRuns(
   admin: SupabaseClient,
   conn: Connection,
   sinceDate: string,
+  maxPages: number,
 ): Promise<number> {
   const token = await freshAccessToken(admin, conn);
   if (!token) return 0;
   const after = Math.floor(Date.parse(`${sinceDate}T00:00:00Z`) / 1000) - 86_400;
 
   const runs = [];
-  for (let page = 1; page <= 3; page++) {
+  for (let page = 1; page <= maxPages; page++) {
     const res = await fetch(`${API}/athlete/activities?after=${after}&per_page=100&page=${page}`, {
       headers: { authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(TIMEOUT_MS),
@@ -143,7 +144,7 @@ async function importRuns(
 export async function syncStrava(
   userIds: string[],
   sinceDate: string,
-  options: { force?: boolean } = {},
+  options: { force?: boolean; maxPages?: number } = {},
 ): Promise<void> {
   const admin = adminClient();
   if (!admin || !stravaConfig() || userIds.length === 0) return;
@@ -160,7 +161,7 @@ export async function syncStrava(
       const { data } = await claim
         .select('user_id, access_token, refresh_token, expires_at')
         .maybeSingle();
-      if (data) await importRuns(admin, data as Connection, sinceDate);
+      if (data) await importRuns(admin, data as Connection, sinceDate, options.maxPages ?? 3);
     }),
   );
 }

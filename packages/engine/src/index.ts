@@ -3,6 +3,14 @@
 export { scoreSeason } from './score';
 export { commitmentBands, validateCommitment, type CommitmentBands } from './commitment';
 export { duelGroups } from './pairings';
+export {
+  deriveBaseline,
+  lookBack,
+  type LookBackBlock,
+  type LookBackInput,
+  type LookBackResult,
+  type LookBackTotal,
+} from './lookback';
 export { getRules, maxWeeklyPoints, RULES_VERSIONS, rulesV1, type Rules } from './rules';
 export { addDays, londonDate, londonInstant } from './time';
 export type * from './types';
