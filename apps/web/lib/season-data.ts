@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { after } from 'next/server';
 import type { Activity, Bounty, Commitment, Runner, SeasonInput } from '@crew/engine';
 import { buildSeasonView, type OutsideRun, type SeasonView } from '@/app/_season/view';
-import { requireUserId } from './auth';
+import { requireUser } from './auth';
 import { adminClient, syncStrava } from './strava-sync';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -14,18 +14,6 @@ export interface SeasonRow {
   start_date: string;
   status: 'setup' | 'active' | 'closed';
   rules_version: string;
-}
-
-export interface CrewMemberRow {
-  user_id: string;
-  role: 'organiser' | 'member';
-  profiles: { display_name: string } | { display_name: string }[] | null;
-}
-
-/** A crew member's display name. */
-export function memberName(m: CrewMemberRow): string {
-  const p = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
-  return p?.display_name ?? 'Runner';
 }
 
 interface Snapshot {
@@ -53,9 +41,9 @@ export function snapshotToInput(snapshot: Snapshot, asOf: string): SeasonInput |
 /** The signed-in user, their crew and its latest season. Not found if they aren't in the crew. */
 export const getCrewContext = cache(async (crewId: string) => {
   if (!UUID.test(crewId)) notFound();
-  const { supabase, user } = await requireUserId(`/c/${crewId}`);
+  const { supabase, user } = await requireUser(`/c/${crewId}`);
   // Row Level Security means a non-member gets nothing back, which reads as "not found".
-  const [{ data: crew }, { data: seasons }, { data: members }] = await Promise.all([
+  const [{ data: crew }, { data: seasons }] = await Promise.all([
     supabase
       .from('crews')
       .select('id, name, invite_code, organiser_id')
@@ -67,11 +55,6 @@ export const getCrewContext = cache(async (crewId: string) => {
       .eq('crew_id', crewId)
       .order('number', { ascending: false })
       .limit(1),
-    supabase
-      .from('crew_members')
-      .select('user_id, role, profiles(display_name)')
-      .eq('crew_id', crewId)
-      .order('joined_at'),
   ]);
   if (!crew) notFound();
   const season = ((seasons ?? [])[0] ?? null) as SeasonRow | null;
@@ -80,7 +63,6 @@ export const getCrewContext = cache(async (crewId: string) => {
     user,
     crew: crew as { id: string; name: string; invite_code: string; organiser_id: string },
     season,
-    members: (members ?? []) as CrewMemberRow[],
     isOrganiser: crew.organiser_id === user.id,
   };
 });
@@ -133,9 +115,16 @@ const OUTSIDE_RUN_LIMIT = 200;
  * the feed but never scored.
  */
 async function loadOutsideRuns(crewId: string) {
-  const { supabase, members } = await getCrewContext(crewId);
+  const { supabase } = await getCrewContext(crewId);
+  const { data: members } = await supabase
+    .from('crew_members')
+    .select('user_id, profiles(display_name)')
+    .eq('crew_id', crewId);
   const otherNames: Record<string, string> = {};
-  for (const m of members) otherNames[m.user_id] = memberName(m);
+  for (const m of members ?? []) {
+    const p = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
+    otherNames[m.user_id as string] = (p?.display_name as string | undefined) ?? 'Runner';
+  }
   const ids = Object.keys(otherNames);
   if (ids.length === 0) return { outsideRuns: [] as OutsideRun[], otherNames };
 
