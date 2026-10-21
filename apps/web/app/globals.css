@@ -2499,3 +2499,12 @@ button {
 .feed .figure-main {
   margin-top: auto;
 }
+
+/* Avatars go back to a plain dark plate with the initial. */
+.avatar.tone-0,
+.avatar.tone-1,
+.avatar.tone-2,
+.avatar.tone-3,
+.avatar.tone-4 {
+  background: var(--plate);
+}
