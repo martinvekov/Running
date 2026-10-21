@@ -1,0 +1,15 @@
+{
+  "name": "@crew/supabase",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.0",
+    "pg": "^8.16.0",
+    "vitest": "^4.1.12"
+  }
+}

@@ -21,5 +21,5 @@ The same fixture is published as a demo season at `/demo` on the web app.
 
 - `apps/web` — Next.js app (App Router), deployed on Vercel with root directory `apps/web`
 - `packages/engine` — pure scoring engine, no I/O
-- `supabase/` — config, migrations and policy tests
+- `supabase/` — config, migrations, access rules and their tests
 - `docs/` — brief, scoring rules, parked ideas
