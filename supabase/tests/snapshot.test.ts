@@ -21,7 +21,13 @@ if (!available && process.env.CI) {
 interface Snapshot {
   season: { id: string; start_date: string; status: string; rules_version: string } | null;
   runners: { id: string; name: string; baselineKm: number; baselineRuns: number }[];
-  commitments: { runnerId: string; weekIndex: number; km: number; runs: number; committedAt: string }[];
+  commitments: {
+    runnerId: string;
+    weekIndex: number;
+    km: number;
+    runs: number;
+    committedAt: string;
+  }[];
   activities: {
     id: string;
     runnerId: string;
