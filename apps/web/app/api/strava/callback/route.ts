@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getCrewContext } from '@/lib/season-data';
+import { lookBackWindow } from '@/lib/lookback-window';
+import { outcomeQuery } from '@/lib/strava-outcome';
 import { adminClient, exchangeCode, syncStrava } from '@/lib/strava-sync';
+import { londonDate } from '@crew/engine';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +20,11 @@ export async function GET(request: NextRequest) {
   if (!expected || state !== expected) return back('error=strava');
   const { user, season } = await getCrewContext(crewId);
   if (params.get('error') || !params.get('code')) return back('error=strava-denied');
+  // Strava lets people untick what they share. Without activity access there is nothing to read.
+  const scope = params.get('scope');
+  if (scope && !scope.split(',').includes('activity:read')) {
+    return back('strava=no-access&http=403');
+  }
 
   const admin = adminClient();
   const tokens = await exchangeCode(params.get('code')!);
@@ -33,10 +41,14 @@ export async function GET(request: NextRequest) {
   });
   if (error) return back('error=strava');
 
-  if (season && season.status !== 'closed') {
+  let query = 'saved=strava';
+  if (page === 'preseason') {
+    const w = lookBackWindow(londonDate(new Date().toISOString()));
+    query = outcomeQuery(await syncStrava([user.id], w.historyFrom, { force: true, maxPages: 10 }));
+  } else if (season && season.status !== 'closed') {
     await syncStrava([user.id], season.start_date, { force: true });
   }
-  const response = back('saved=strava');
+  const response = back(query);
   response.cookies.delete({ name: 'strava_state', path: '/api/strava' });
   return response;
 }

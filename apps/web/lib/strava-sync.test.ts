@@ -122,8 +122,40 @@ describe('syncStrava', () => {
       vi.fn(async () => Response.json({}, { status: 500 })),
     );
     const { syncStrava } = await import('./strava-sync');
-    await expect(syncStrava(['u1'], '2026-11-02')).resolves.toBeUndefined();
+    const out = await syncStrava(['u1'], '2026-11-02');
+    expect(out).toEqual([{ status: 'strava-error', httpStatus: 500 }]);
     expect(inserted).toHaveLength(0);
+  });
+
+  it('says so when Strava refuses to share runs', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({}, { status: 401 })),
+    );
+    const { syncStrava } = await import('./strava-sync');
+    expect(await syncStrava(['u1'], '2026-11-02')).toEqual([
+      { status: 'no-access', httpStatus: 401 },
+    ]);
+  });
+
+  it('reports how many runs it found and saved', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json([run(1), run(3)])),
+    );
+    const { syncStrava } = await import('./strava-sync');
+    expect(await syncStrava(['u1'], '2026-11-02')).toEqual([
+      { status: 'ok', found: 2, imported: 2 },
+    ]);
+  });
+
+  it('reports not connected when a forced sync finds no connection', async () => {
+    claimResult = null;
+    vi.stubGlobal('fetch', vi.fn());
+    const { syncStrava } = await import('./strava-sync');
+    expect(await syncStrava(['u1'], '2026-11-02', { force: true })).toEqual([
+      { status: 'not-connected' },
+    ]);
   });
 
   it('does nothing when the keys are not set', async () => {
