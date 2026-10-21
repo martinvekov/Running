@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { londonDate, rulesV1, validateCommitment } from '@crew/engine';
 import { getCrewContext, getSeasonView } from '@/lib/season-data';
+import { syncStrava } from '@/lib/strava-sync';
 import {
   parseBaseline,
   parseBounties,
@@ -168,4 +169,22 @@ export async function setCommitment(formData: FormData) {
   });
   if (error) redirect(back('error=save'));
   redirect(back('saved=commitment'));
+}
+
+/** Stop syncing Strava. Runs already imported stay in the season. */
+export async function disconnectStrava(formData: FormData) {
+  const crewId = crewIdOf(formData);
+  const { supabase, user } = await getCrewContext(crewId);
+  await supabase.from('strava_connections').delete().eq('user_id', user.id);
+  redirect(`/c/${crewId}/log?saved=strava-off`);
+}
+
+/** Fetch new Strava runs now, instead of waiting for the next automatic sync. */
+export async function syncStravaNow(formData: FormData) {
+  const crewId = crewIdOf(formData);
+  const { user, season } = await getCrewContext(crewId);
+  if (season && season.status === 'active') {
+    await syncStrava([user.id], season.start_date, { force: true });
+  }
+  redirect(`/c/${crewId}/log?saved=strava-sync`);
 }
