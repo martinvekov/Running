@@ -61,10 +61,7 @@ export function buildSeasonView(
   const runnersById = new Map(runners.map((r) => [r.id, r]));
   const seasonIds = new Set(input.activities.map((a) => a.id));
   const outsideRuns = (options.outsideRuns ?? []).filter((r) => !seasonIds.has(r.id));
-  // The feed is the costly part (it re-scores the season after every run), and only the feed and
-  // run pages use it, so it is built the first time something asks for it.
-  let feedData: ReturnType<typeof buildFeedData> | undefined;
-  const feedOnce = () => (feedData ??= buildFeedData(input, result, outsideRuns));
+  const { runContexts, feed } = buildFeedData(input, result, outsideRuns);
   const otherNames = options.otherNames ?? {};
   return {
     base: options.base,
@@ -76,12 +73,8 @@ export function buildSeasonView(
     runners,
     runnersById,
     runnerName: (id) => runnersById.get(id)?.name ?? otherNames[id] ?? 'Runner',
-    get runContexts() {
-      return feedOnce().runContexts;
-    },
-    get feed() {
-      return feedOnce().feed;
-    },
+    runContexts,
+    feed,
     weekDays: (runnerId, weekIndex) => weekDays(result, runnerId, weekIndex),
   };
 }

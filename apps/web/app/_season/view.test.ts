@@ -57,13 +57,3 @@ describe('runs outside the season', () => {
     expect(view.feed.filter((i) => i.kind === 'past')).toHaveLength(0);
   });
 });
-
-describe('the feed', () => {
-  it('is built once, and only when asked for', () => {
-    const view = buildSeasonView(fiveRunners, { base: '/c/x', crewName: 'Test' });
-    expect(view.result.standings.length).toBeGreaterThan(0);
-    expect(view.feed).toBe(view.feed);
-    expect(view.runContexts).toBe(view.runContexts);
-    expect(view.feed.length).toBeGreaterThan(0);
-  });
-});
